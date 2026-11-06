@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shopee 活动公告智能提取与表格转换工具 (永久免费版)</title>
+  <style>
+    :root {
+      --primary: #2b65ec;
+      --primary-hover: #1e4ec8;
+      --bg-page: #f5f6f8;
+      --bg-card: #ffffff;
+      --text-main: #1f2329;
+      --text-sub: #646a73;
+      --text-muted: #8f959e;
+      --border: #dee0e3;
+      --border-light: #eaedf1;
+      --success-bg: #e8ffea;
+      --success-text: #00b42a;
+      --success-border: #aff0b5;
+      --danger-bg: #fff0f0;
+      --danger-text: #f53f3f;
+      --danger-border: #ffccc7;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: var(--bg-page);
+      color: var(--text-main);
+      padding: 24px 16px;
+      line-height: 1.5;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .header {
+      background: var(--bg-card);
+      padding: 20px 24px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .title-area h1 {
+      font-size: 18px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .badge {
+      font-size: 11px;
+      background: var(--success-bg);
+      color: var(--success-text);
+      border: 1px solid var(--success-border);
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-weight: 500;
+    }
+    .input-card {
+      background: var(--bg-card);
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+    .textarea-box {
+      width: 100%;
+      height: 160px;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 13px;
+      color: var(--text-main);
+      background: #fafbfc;
+      outline: none;
+      resize: vertical;
+      transition: all 0.2s;
+    }
+    .textarea-box:focus {
+      border-color: var(--primary);
+      background: #ffffff;
+      box-shadow: 0 0 0 3px rgba(43,101,236,0.1);
+    }
+    .action-bar {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .btn {
+      padding: 8px 18px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid transparent;
+      transition: all 0.15s;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+    }
+    .btn-primary:hover {
+      background: var(--primary-hover);
+    }
+    .btn-outline {
+      background: #fff;
+      color: var(--text-sub);
+      border-color: var(--border);
+    }
+    .btn-outline:hover {
+      background: #f2f3f5;
+      color: var(--text-main);
+    }
+    .btn-success {
+      background: #00b42a;
+      color: #fff;
+      margin-left: auto;
+    }
+    .btn-success:hover {
+      background: #009a24;
+    }
+    .result-section {
+      background: var(--bg-card);
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .table-responsive {
+      overflow-x: auto;
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      text-align: left;
+    }
+    th {
+      background: #f7f8fa;
+      padding: 10px 12px;
+      font-weight: 600;
+      color: var(--text-sub);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border-light);
+      vertical-align: middle;
+      color: var(--text-main);
+    }
+    tr:hover td {
+      background: #fafbfc;
+    }
+    .site-tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .tag-my { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+    .tag-mx { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+    .tag-br { background: #dbeafe; color: #1d4ed8; border: 1px solid #bfdbfe; }
+    .tag-ph { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+    .tag-tw { background: #f3e8ff; color: #7e22ce; border: 1px solid #d8b4fe; }
+    .tag-sg { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+    .tag-th { background: #ffedd5; color: #c2410c; border: 1px solid #fed7aa; }
+    .tag-ar { background: #ecfccb; color: #4d7c0f; border: 1px solid #d9f99d; }
+    .tag-other { background: #f3f4f6; color: #4b5563; border: 1px solid #e5e7eb; }
+    .status-chip {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 11px;
+      background: #fff7e6;
+      color: #d46b08;
+      border: 1px solid #ffd591;
+      white-space: nowrap;
+    }
+    .link-btn {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+    .link-btn:hover { text-decoration: underline; }
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #1f2329;
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 6px;
+      font-size: 13px;
+      display: none;
+      z-index: 999;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+  </style>
+</head>
+<body>
+  <div id="toast" class="toast">✓ 数据已复制到剪贴板！可直接在企微智能表格首列按 Ctrl+V 粘贴</div>
+  <div class="container">
+    <div class="header">
+      <div class="title-area">
+        <h1>📊 Shopee 活动公告智能识别与转表工具 <span class="badge">永久免费 · 纯本地运行</span></h1>
+        <p style="font-size:12px; color:var(--text-muted); margin-top:4px;">
+          支持单条或多条群公告一次性粘贴，自动拆分多市场/多活动，一键复制直接粘贴入企业微信智能表格
+        </p>
+      </div>
+      <div>
+        <button class="btn btn-outline" onclick="loadYesterdaySamples()">📥 载入昨日实战公告</button>
+      </div>
+    </div>
+
+    <div class="input-card">
+      <textarea id="raw-input" class="textarea-box" placeholder="请在此粘贴任意群公告文本（支持单条、多条、机器人提醒消息混合粘贴）..."></textarea>
+      <div class="action-bar">
+        <button class="btn btn-primary" onclick="parseAll()">⚡ 一键批量解析提取</button>
+        <button class="btn btn-outline" onclick="clearInput()">🧹 清空内容</button>
+        <button class="btn btn-success" id="btn-copy-all" onclick="copyTableData()">📋 一键复制全部行 (直接在企微按 Ctrl+V 粘贴)</button>
+      </div>
+    </div>
+
+    <div class="result-section">
+      <div class="result-header">
+        <h2 style="font-size:14px; font-weight:600;">解析结果列表 (<span id="count-span">0</span> 条活动)</h2>
+        <span style="font-size:12px; color:var(--text-muted);">字段顺序已完全适配企业微信智能表格模板</span>
+      </div>
+      <div class="table-responsive">
+        <table id="result-table">
+          <thead>
+            <tr>
+              <th>序号</th>
+              <th>站点/市场</th>
+              <th>活动全称 / 任务</th>
+              <th>提报截止时间</th>
+              <th>价格与准入要求</th>
+              <th>活动排期 / 批次</th>
+              <th>报名/名单链接</th>
+              <th>后台搜索路径</th>
+              <th>提报状态</th>
+              <th>活动经理 / 对接人</th>
+            </tr>
+          </thead>
+          <tbody id="table-body">
+            <tr>
+              <td colspan="10" style="text-align: center; color: var(--text-muted); padding: 30px;">
+                暂无数据，请在上方输入框粘贴公告并点击“一键批量解析提取”
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    var parsedList = [];
+
+    function showToast(msg) {
+      var t = document.getElementById('toast');
+      t.innerText = msg;
+      t.style.display = 'block';
+      setTimeout(function(){ t.style.display = 'none'; }, 3500);
+    }
+
+    function clearInput() {
+      document.getElementById('raw-input').value = '';
+      parsedList = [];
+      renderTable();
+    }
+
+    function splitAnnouncements(rawText) {
+      // Clean escape characters like \_
+      var text = rawText.replace(/\\_/g, '_');
+      
+      // Split by common message boundaries
+      var chunks = [];
+      // If user pasted JSON array or quotes
+      if (text.indexOf('","') !== -1 || text.indexOf('", "') !== -1) {
+        chunks = text.split(/"\s*,\s*"/);
+      } else {
+        // Split by known message header patterns
+        var blocks = text.split(/(?=\n?【(?:菲律宾|马来|墨西哥|印尼|台湾|阿根廷|新加坡|巴西|泰国|越南|PH|MY|MX|ID|TW|BR|TH|SG|AR)[^】\n]*】全品类卖家活动公告|\[🤖活动智能提醒助手\]|📢【|⚠提醒\s+[A-Z]{2}|台湾【11\.11|🔥\s*大促流量高峰|【FBS\s+Pene%\s+Program】)/g);
+        if (blocks.length > 1) {
+          chunks = blocks;
+        } else {
+          chunks = [text];
+        }
+      }
+
+      var results = [];
+      chunks.forEach(function(chunk) {
+        var c = chunk.replace(/^["“”\s]+|["“”\s]+$/g, '').trim();
+        if (c) results.push(c);
+      });
+      return results;
+    }
+
+    function getSiteTagClass(site) {
+      if (/马|MY/i.test(site)) return 'tag-my';
+      if (/墨|MX/i.test(site)) return 'tag-mx';
+      if (/巴|BR/i.test(site)) return 'tag-br';
+      if (/菲|PH/i.test(site)) return 'tag-ph';
+      if (/台|TW/i.test(site)) return 'tag-tw';
+      if (/新|SG/i.test(site)) return 'tag-sg';
+      if (/泰|TH/i.test(site)) return 'tag-th';
+      if (/阿|AR/i.test(site)) return 'tag-ar';
+      return 'tag-other';
+    }
+
+    function parseSingle(text) {
+      // 1. Site Detection
+      var site = "全站点/官方";
+      var siteMatch = text.match(/【(BR巴西|MX墨西哥|PH菲律宾|AR阿根廷|马来|墨西哥|印尼|菲律宾|台湾|新加坡|巴西|泰国|越南|马来CNCB|PH|MY|MX|ID|TW|BR|TH|SG|AR)[^】]*】/) ||
+                        text.match(/(?:提醒|搜|搜:|搜：)\s*([A-Z]{2}|巴西|墨西哥|马来|印尼|菲律宾|台湾|新加坡|泰国|阿根廷)/i) ||
+                        text.match(/(BR巴西|MX墨西哥|PH|MY|MX|ID|TW|BR|TH|SG|AR|巴西|墨西哥|马来|印尼|菲律宾|台湾|新加坡|泰国|阿根廷)/i);
+      if (siteMatch) {
+        site = siteMatch[1].replace(/CNCB|全品类卖家活动公告/g, '').trim();
+      }
+
+      // 2. Deadline
+      var deadline = "详见通知";
+      var deadMatch = text.match(/(?:距提报截止时间（|截止时间[：:]|⏰截止[：:]?|⏰反馈截止[：:]?|截止[：:]|DDL[：:]|免费试用退出截止时间[：:]|今天下午|今天)([\s\d\/\-年\.\:：点!！]+(?:[0-9]{1,2}:[0-9]{1,2}|[0-9]{1,2}点)?)/i);
+      if (deadMatch) {
+        deadline = deadMatch[1].replace(/[!！\(\)（）]/g, '').trim();
+        if (text.indexOf('今天下午4点') !== -1 || text.indexOf('今天下午 4 点') !== -1) deadline = "当天 16:00";
+        if (text.indexOf('今天16点') !== -1) deadline = "当天 16:00";
+      }
+
+      // 3. Campaign Title / Task Name
+      var title = "";
+      var titleMatch = text.match(/【([^】\n]*(?:LTD|提报|议价|秒杀|试用|大促|特卖|选品|自营|Program|价格上限|素材分享|活动|会场|激励)[^】\n]*)】/) ||
+                         text.match(/📢?【([^】\n]+)】/) ||
+                         text.match(/(?:🔥|📢)?\s*([^\n]+(?:大促|激励|提品|议价|排期|选品|提报)[^\n]*)/);
+      if (titleMatch) {
+        title = titleMatch[1].trim();
+      } else {
+        var lines = text.split('\n').filter(function(l){ return l.trim().length > 0; });
+        title = (lines[0] || "活动公告").substring(0, 45);
+      }
+      title = title.replace(/^重要提醒[！!]?\s*/, '').replace(/全品类卖家活动公告.*$/, '').trim();
+      if (!title) title = "活动提报汇总";
+
+      // 4. Links (Registration / Doc / Sheets)
+      var regLinks = [];
+      var urls = text.match(/https?:\/\/[^\s\u4e00-\u9fa5\)）\]]+/g);
+      if (urls && urls.length > 0) {
+        for (var i = 0; i < urls.length; i++) {
+          var u = urls[i].replace(/[!！,\.。]+$/, '');
+          if (regLinks.indexOf(u) === -1) regLinks.push(u);
+        }
+      }
+      var linkDisplay = regLinks.length > 0 ? regLinks.join("\n") : "-";
+
+      // 5. Backend Search / Path
+      var path = "-";
+      var pathMatch = text.match(/(?:报名途径|提报渠道|入口|提报路径)[：:]?\s*([^\n]+)/) ||
+                        text.match(/(?:卖家中心|卖家后台|中国卖家中心)[^>\n]*>[^\n]+/);
+      if (pathMatch) {
+        path = pathMatch[1] ? pathMatch[1].trim() : pathMatch[0].trim();
+      }
+
+      // 6. Requirements
+      var reqList = [];
+      var reqMatch = text.match(/(?:✅要求|提报要求|注意事项|要求|条件|报价需满足|参与方式)[：:]?\s*([\s\S]*?)(?=(?:提报说明|如有疑问|有问题|相关文章|发送人|截止|入口|Task|━━━━━━━━|\n\n|$))/);
+      if (reqMatch) {
+        var cleanReq = reqMatch[1].replace(/^[0-9\.\s、\-\*]+/mg, '').replace(/\n+/g, '； ').trim();
+        if (cleanReq.length > 120) cleanReq = cleanReq.substring(0, 120) + '...';
+        reqList.push(cleanReq);
+      }
+      var reqStr = reqList.length > 0 ? reqList[0] : "-";
+      if (text.indexOf('9月最低价') !== -1) reqStr = "9月最低价（税前）" + (reqStr !== "-" ? "； " + reqStr : "");
+      if (text.indexOf('Penalty point') !== -1) reqStr = "店铺罚分<=2，状态正常" + (reqStr !== "-" ? "； " + reqStr : "");
+
+      // 7. Schedule / Batches / Period
+      var schedule = "-";
+      var schedMatch = text.match(/(?:活动时间|活动周期|免费试用期|排期)[：:]?\s*([^\n]+)/) ||
+                         text.match(/([0-9]{1,2}\.[0-9]{1,2}\s*[-~至]\s*[0-9]{1,2}\.[0-9]{1,2}[^\n]*)/);
+      if (schedMatch) {
+        schedule = schedMatch[1].trim();
+      }
+      var subBatches = text.match(/[①②③④⑤\d\.]+\s*[^①②③④⑤\n]+/g);
+      if (subBatches && subBatches.length > 1) {
+        schedule = subBatches.map(function(s){ return s.trim(); }).join(" | ");
+      }
+
+      // 8. Contact / Manager
+      var manager = "-";
+      var mgrMatch = text.match(/(?:发送人[：:]|咨询活动经理|活动经理|对接人|咨询|联系)[：:]?\s*([a-zA-Z\u4e00-\u9fa5\/]+)/);
+      if (mgrMatch) {
+        manager = mgrMatch[1].trim();
+      }
+
+      return {
+        site: site,
+        title: title,
+        deadline: deadline,
+        req: reqStr,
+        schedule: schedule,
+        link: linkDisplay,
+        path: path,
+        status: "待提报",
+        manager: manager
+      };
+    }
+
+    function parseAll() {
+      var raw = document.getElementById('raw-input').value.trim();
+      if (!raw) {
+        alert("请先粘贴公告文本！");
+        return;
+      }
+      var chunks = splitAnnouncements(raw);
+      parsedList = [];
+      chunks.forEach(function(chunk) {
+        if (chunk.length > 15) {
+          parsedList.push(parseSingle(chunk));
+        }
+      });
+      renderTable();
+      showToast("已成功识别 " + parsedList.length + " 条活动公告！");
+    }
+
+    function renderTable() {
+      var tbody = document.getElementById('table-body');
+      document.getElementById('count-span').innerText = parsedList.length;
+      if (parsedList.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; color: var(--text-muted); padding: 30px;">暂无数据</td></tr>';
+        return;
+      }
+      var html = '';
+      parsedList.forEach(function(item, idx) {
+        var siteTag = '<span class="site-tag ' + getSiteTagClass(item.site) + '">' + item.site + '</span>';
+        var linksHtml = item.link === '-' ? '-' : item.link.split('\n').map(function(l){
+          return '<a href="' + l + '" target="_blank" class="link-btn">🔗 查看链接</a>';
+        }).join('<br>');
+
+        html += '<tr>' +
+          '<td>' + (idx + 1) + '</td>' +
+          '<td>' + siteTag + '</td>' +
+          '<td style="font-weight:600; max-width:220px;">' + item.title + '</td>' +
+          '<td style="color:var(--danger-text); font-weight:500; white-space:nowrap;">' + item.deadline + '</td>' +
+          '<td style="max-width:200px; font-size:11px; color:var(--text-sub);">' + item.req + '</td>' +
+          '<td style="max-width:180px; font-size:11px;">' + item.schedule + '</td>' +
+          '<td>' + linksHtml + '</td>' +
+          '<td style="font-size:11px; max-width:150px;">' + item.path + '</td>' +
+          '<td><span class="status-chip">待提报</span></td>' +
+          '<td>' + item.manager + '</td>' +
+        '</tr>';
+      });
+      tbody.innerHTML = html;
+    }
+
+    function copyTableData() {
+      if (parsedList.length === 0) {
+        alert("当前没有可复制的数据，请先解析！");
+        return;
+      }
+      var rows = [];
+      parsedList.forEach(function(item) {
+        var cleanLink = item.link.replace(/\n/g, ' ');
+        var cleanReq = item.req.replace(/\t|\r|\n/g, ' ');
+        var cleanSchedule = item.schedule.replace(/\t|\r|\n/g, ' ');
+        var cleanPath = item.path.replace(/\t|\r|\n/g, ' ');
+        // TSV format for direct Excel / Smart Sheet pasting
+        rows.push([
+          item.site,
+          item.title,
+          item.deadline,
+          cleanReq,
+          cleanSchedule,
+          cleanLink,
+          cleanPath,
+          item.status,
+          item.manager
+        ].join('\t'));
+      });
+      var tsvContent = rows.join('\n');
+      navigator.clipboard.writeText(tsvContent).then(function() {
+        showToast("✓ 已复制 " + parsedList.length + " 行数据！直接在企微智能表格首列按 Ctrl+V 粘贴即可！");
+      });
+    }
+
+    function loadYesterdaySamples() {
+      var sampleText = `【FBS Pene% Program】 10月达成预测：
+🎉恭喜您入选2026官方海外仓高潜卖家增长项目。
+🎉请查看10月整月的达成情况，G列为预测激励，实际激励以后续正式通知为准：https://shimo.im/sheets/gXqmd6OBwWHYpg3o/eNMoh#viewport_eNMoh_EUGQsYmfh0lJ35wC
+🎉项目介绍：https://shimo.im/sheets/gXqmd6OBwWHYpg3o/BOD3W
+
+[🤖活动智能提醒助手] 威海诺亚国际贸易有限公司 - GGP您好，您还有以下活动未提报：
+距提报截止时间（2026-11-09 12:00）还剩3天18小时46分钟
+【BR巴西】【  2026年12月 月度议价】
+⏰反馈截止：11/9 12点
+提报渠道：卖家中心> 营销中心 > 跨境活动报名> 搜BR>勾全部店铺
+
+📢【PH Instant Delivery 可售商品价格上限提升至₱200,000】
+活动福利：自11月3日起，Instant Delivery可激活商品单价上限提升至₱200,000
+PH Instant Delivery功能介绍：https://shopee.cn/edu/article/27579
+
+【菲律宾】全品类卖家活动公告 11/4 11:21:42
+【PH MDV免费试用 -11.3-11.9 Batch】
+卖家名单：https://doc.weixin.qq.com/sheet/e3_ATUAyQY1AJUCNcB8xTOn6QCyw1Vt1?scode=AHIAtge9AAY6xmdBsvATUAyQY1AJU&tab=2dazil
+免费试用期：11月3日 00:00 - 11月9日 23:59
+免费试用退出截止时间：11月9日 17:00
+
+【菲律宾】全品类卖家活动公告 11/5 10:20:56
+【PH产品提报】12月上半月秒杀池议价&自主提报（含12.12年终大促）
+[卖家名单请点击]https://doc.weixin.qq.com/sheet/e3_ATUAyQY1AJUCNRzuzyx04RCSJ4Vfw?scode=AHIAtge9AAYjv8jTaaATUAyQY1AJU&tab=6vi69t
+活动周期：2026.12.01 - 2026.12.15
+❗❗提报截止时间：11/12 15:00 ❗❗
+提报渠道：跨境活动报名｜Task ID 16106 16107 16108 16109
+
+⚠提醒 MX墨西哥12月曝光自提品 今天16点截止
+【MX自营  12月提品】
+截止：11/5 16点
+https://shimo.im/sheets/XyyMrIBJ8jaimgnl/d33C5
+活动时间：12.1-12.31 (大促+活动+秒杀曝光)
+
+台湾【11.11 Motors 分會場】DDL：11/6  12:00
+需要卖家提交 一品 +一券，我们会给与额外曝光。
+链接：https://shimo.im/sheets/erAdML10LYiyRD3G/3F3vB
+
+【AR阿根廷 12月提品】
+截止：11/9 16点
+https://shimo.im/sheets/KlkKvdvdLOSoXOqd/Lu3CS
+活动时间： 12/1-12/31
+
+【新加坡】11月秒杀排期（更新至11/4）
+https://doc.weixin.qq.com/sheet/e3_AT4A3gbvAHECNiKBAwJssSAu3GJcF?scode=AHIAtge9AAYLbLLM3FAT4A3gbvAHE&tab=kz4rp9`;
+      document.getElementById('raw-input').value = sampleText;
+      parseAll();
+    }
+  </script>
+</body>
+</html>
