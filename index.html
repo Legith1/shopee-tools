@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Shopee 活动公告智能提取与表格转换工具 (飞书&企微完美对齐版)</title>
+  <title>Shopee 活动公告智能提取与表格转换工具 (飞书插件专版·防复制拦截)</title>
   <style>
     :root {
       --primary: #2b65ec;
@@ -27,7 +27,7 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
       background: var(--bg-page);
       color: var(--text-main);
-      padding: 24px 16px;
+      padding: 16px;
       line-height: 1.5;
     }
     .container {
@@ -36,19 +36,19 @@
     }
     .header {
       background: var(--bg-card);
-      padding: 18px 24px;
-      border-radius: 10px;
+      padding: 16px 20px;
+      border-radius: 8px;
       border: 1px solid var(--border);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-      margin-bottom: 18px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+      margin-bottom: 14px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
-      gap: 12px;
+      gap: 10px;
     }
     .title-area h1 {
-      font-size: 18px;
+      font-size: 16px;
       font-weight: 600;
       display: flex;
       align-items: center;
@@ -65,19 +65,19 @@
     }
     .input-card {
       background: var(--bg-card);
-      border-radius: 10px;
+      border-radius: 8px;
       border: 1px solid var(--border);
-      padding: 18px;
-      margin-bottom: 18px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+      padding: 16px;
+      margin-bottom: 14px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
     }
     .textarea-box {
       width: 100%;
-      height: 150px;
-      padding: 12px;
+      height: 130px;
+      padding: 10px;
       border: 1px solid var(--border);
-      border-radius: 8px;
-      font-size: 13px;
+      border-radius: 6px;
+      font-size: 12px;
       color: var(--text-main);
       background: #fafbfc;
       outline: none;
@@ -91,20 +91,20 @@
     }
     .action-bar {
       display: flex;
-      gap: 10px;
-      margin-top: 14px;
+      gap: 8px;
+      margin-top: 12px;
       flex-wrap: wrap;
       align-items: center;
     }
     .btn {
-      padding: 8px 18px;
-      border-radius: 6px;
-      font-size: 13px;
+      padding: 7px 16px;
+      border-radius: 5px;
+      font-size: 12px;
       font-weight: 500;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       border: 1px solid transparent;
       transition: all 0.15s;
     }
@@ -128,44 +128,50 @@
       background: #00b42a;
       color: #fff;
       margin-left: auto;
+      font-size: 13px;
     }
     .btn-success:hover {
       background: #009a24;
     }
     .result-section {
       background: var(--bg-card);
-      border-radius: 10px;
+      border-radius: 8px;
       border: 1px solid var(--border);
-      padding: 18px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+      padding: 16px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+      margin-bottom: 14px;
     }
     .result-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
     }
     .table-responsive {
       overflow-x: auto;
       border: 1px solid var(--border-light);
-      border-radius: 8px;
+      border-radius: 6px;
+      max-height: 280px;
     }
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 12px;
+      font-size: 11px;
       text-align: left;
     }
     th {
       background: #f7f8fa;
-      padding: 10px 12px;
+      padding: 8px 10px;
       font-weight: 600;
       color: var(--text-sub);
       border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
       white-space: nowrap;
+      z-index: 2;
     }
     td {
-      padding: 10px 12px;
+      padding: 8px 10px;
       border-bottom: 1px solid var(--border-light);
       vertical-align: middle;
       color: var(--text-main);
@@ -175,51 +181,59 @@
     }
     .site-tag {
       display: inline-block;
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-size: 11px;
+      padding: 1px 6px;
+      border-radius: 3px;
+      font-size: 10px;
       font-weight: 500;
       white-space: nowrap;
     }
-    .tag-my { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
-    .tag-mx { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
-    .tag-br { background: #dbeafe; color: #1d4ed8; border: 1px solid #bfdbfe; }
-    .tag-ph { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
-    .tag-tw { background: #f3e8ff; color: #7e22ce; border: 1px solid #d8b4fe; }
-    .tag-sg { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
-    .tag-th { background: #ffedd5; color: #c2410c; border: 1px solid #fed7aa; }
-    .tag-ar { background: #ecfccb; color: #4d7c0f; border: 1px solid #d9f99d; }
-    .tag-other { background: #f3f4f6; color: #4b5563; border: 1px solid #e5e7eb; }
+    .tag-my { background: #fee2e2; color: #b91c1c; }
+    .tag-mx { background: #fef3c7; color: #b45309; }
+    .tag-br { background: #dbeafe; color: #1d4ed8; }
+    .tag-ph { background: #dcfce7; color: #15803d; }
+    .tag-tw { background: #f3e8ff; color: #7e22ce; }
+    .tag-sg { background: #e0f2fe; color: #0369a1; }
+    .tag-th { background: #ffedd5; color: #c2410c; }
+    .tag-ar { background: #ecfccb; color: #4d7c0f; }
+    .tag-other { background: #f3f4f6; color: #4b5563; }
     
     .type-tag {
       display: inline-block;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 11px;
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-size: 10px;
       background: #eef2ff;
       color: #4338ca;
-      border: 1px solid #c7d2fe;
       white-space: nowrap;
     }
     .status-chip {
       display: inline-block;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 11px;
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-size: 10px;
       background: #fff7e6;
       color: #d46b08;
-      border: 1px solid #ffd591;
       white-space: nowrap;
     }
-    .link-btn {
-      color: var(--primary);
-      text-decoration: none;
-      font-weight: 500;
-      display: inline-flex;
-      align-items: center;
-      gap: 3px;
+    .tsv-box-wrap {
+      background: var(--bg-card);
+      border: 1px dashed var(--primary);
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 12px;
     }
-    .link-btn:hover { text-decoration: underline; }
+    .tsv-textarea {
+      width: 100%;
+      height: 70px;
+      font-family: monospace;
+      font-size: 11px;
+      padding: 8px;
+      background: #f8f9fc;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: #333;
+      resize: vertical;
+    }
     .toast {
       position: fixed;
       top: 20px;
@@ -228,22 +242,19 @@
       color: #fff;
       padding: 10px 18px;
       border-radius: 6px;
-      font-size: 13px;
+      font-size: 12px;
       display: none;
-      z-index: 999;
+      z-index: 9999;
       box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     }
   </style>
 </head>
 <body>
-  <div id="toast" class="toast">✓ 数据已复制到剪贴板！10 列完全对齐飞书与企微智能表格</div>
+  <div id="toast" class="toast">✓ 已成功复制到剪贴板！可直接去飞书数据表首列按 Ctrl+V 粘贴</div>
   <div class="container">
     <div class="header">
       <div class="title-area">
-        <h1>📊 Shopee 活动公告智能识别与转表工具 <span class="badge">10列完美对齐飞书版</span></h1>
-        <p style="font-size:12px; color:var(--text-muted); margin-top:4px;">
-          严格对齐飞书/企微 10 字段顺序：站点 | 活动全称 | 活动类型 | 提报截止时间 | 门槛要求 | 排期 | 链接 | 搜索路径 | 提报状态 | 对接人
-        </p>
+        <h1>📊 Shopee 活动公告智能识别转换器 <span class="badge">飞书内嵌插件兼容版</span></h1>
       </div>
       <div>
         <button class="btn btn-outline" onclick="loadYesterdaySamples()">📥 载入昨日实战公告</button>
@@ -251,24 +262,24 @@
     </div>
 
     <div class="input-card">
-      <textarea id="raw-input" class="textarea-box" placeholder="请在此粘贴任意群公告文本（支持单条、多条、机器人提醒消息混合粘贴）..."></textarea>
+      <textarea id="raw-input" class="textarea-box" placeholder="在此粘贴群公告文本（支持单条、多条、机器人提醒消息混合粘贴）..."></textarea>
       <div class="action-bar">
-        <button class="btn btn-primary" onclick="parseAll()">⚡ 一键批量解析提取</button>
-        <button class="btn btn-outline" onclick="clearInput()">🧹 清空内容</button>
-        <button class="btn btn-success" id="btn-copy-all" onclick="copyTableData()">📋 一键复制全部行 (直接在多维表格按 Ctrl+V 粘贴)</button>
+        <button class="btn btn-primary" onclick="parseAll()">⚡ 一键智能提取</button>
+        <button class="btn btn-outline" onclick="clearInput()">🧹 清空</button>
+        <button class="btn btn-success" id="btn-copy-all" onclick="copyTableData()">📋 一键复制全部行 (直接在飞书按 Ctrl+V)</button>
       </div>
     </div>
 
     <div class="result-section">
       <div class="result-header">
-        <h2 style="font-size:14px; font-weight:600;">解析结果列表 (<span id="count-span">0</span> 条活动)</h2>
-        <span style="font-size:12px; color:var(--text-muted);">复制后在飞书「数据表」首列单元格单击并 Ctrl+V，即可 100% 完美无缝入库</span>
+        <h2 style="font-size:13px; font-weight:600;">识别结果列表 (<span id="count-span">0</span> 条活动)</h2>
+        <span style="font-size:11px; color:var(--text-muted);">字段已 100% 严格对齐多维表格 10 列</span>
       </div>
       <div class="table-responsive">
         <table id="result-table">
           <thead>
             <tr>
-              <th>序号</th>
+              <th>#</th>
               <th>1. 站点</th>
               <th>2. 活动全称</th>
               <th>3. 活动类型</th>
@@ -278,17 +289,29 @@
               <th>7. 报名/名单链接</th>
               <th>8. 后台搜索路径</th>
               <th>9. 提报状态</th>
-              <th>10. 活动对接人</th>
+              <th>10. 对接人</th>
             </tr>
           </thead>
           <tbody id="table-body">
             <tr>
-              <td colspan="11" style="text-align: center; color: var(--text-muted); padding: 30px;">
-                暂无数据，请在上方输入框粘贴公告并点击“一键批量解析提取”
+              <td colspan="11" style="text-align: center; color: var(--text-muted); padding: 25px;">
+                暂无数据，请在上方输入框粘贴公告并点击“一键智能提取”
               </td>
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <!-- 备用手动复制框 (防止极少数浏览器/飞书内嵌iframe拦截剪贴板权限) -->
+      <div class="tsv-box-wrap" id="tsv-wrap" style="display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <span style="font-size:12px; font-weight:600; color:var(--primary);">💡 快速备用通道（已为您自动选中文本）：</span>
+          <button class="btn btn-primary" style="padding:4px 10px; font-size:11px;" onclick="selectAndCopyBox()">点击再次复制</button>
+        </div>
+        <textarea id="tsv-output" class="tsv-textarea" readonly onclick="this.select();"></textarea>
+        <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">
+          *如果飞书插件拦截了自动写入剪贴板，只需在此框按一次 <b>Ctrl + C</b>，再去数据表首列按 <b>Ctrl + V</b> 即可！
+        </div>
       </div>
     </div>
   </div>
@@ -300,12 +323,13 @@
       var t = document.getElementById('toast');
       t.innerText = msg;
       t.style.display = 'block';
-      setTimeout(function(){ t.style.display = 'none'; }, 3500);
+      setTimeout(function(){ t.style.display = 'none'; }, 4000);
     }
 
     function clearInput() {
       document.getElementById('raw-input').value = '';
       parsedList = [];
+      document.getElementById('tsv-wrap').style.display = 'none';
       renderTable();
     }
 
@@ -356,6 +380,44 @@
       return '常规活动';
     }
 
+    function cleanTextForParsing(text) {
+      var t = text.replace(/【.*?】全品类卖家活动公告\s+\d{1,2}\/\d{1,2}\s+\d{1,2}:\d{1,2}(?::\d{1,2})?/g, '');
+      t = t.replace(/\*\*/g, '').replace(/[❗!⏰📢👉🔥]/g, '');
+      return t;
+    }
+
+    function normalizeDate(strVal) {
+      if (!strVal || strVal === '-') return '-';
+      var m = strVal.match(/(?:2026年|2026-)?(\d{1,2})[月\/\-](\d{1,2})[日号\s]*(\d{1,2})[点:：时](\d{2})?/);
+      if (m) {
+        var mon = m[1].padStart(2, '0');
+        var day = m[2].padStart(2, '0');
+        var hour = m[3].padStart(2, '0');
+        var min = (m[4] || '00').padStart(2, '0');
+        return '2026-' + mon + '-' + day + ' ' + hour + ':' + min;
+      }
+      return strVal;
+    }
+
+    function extractDeadline(text) {
+      var mBracket = text.match(/距提报截止时间[（\(]([^）\)]+)[）\)]/);
+      if (mBracket) {
+        return normalizeDate(mBracket[1].trim());
+      }
+      if (text.indexOf('今天16点') !== -1 || text.indexOf('今天下午4点') !== -1 || text.indexOf('今天下午 4 点') !== -1) {
+        return '2026-11-06 16:00';
+      }
+      if (text.indexOf('今天17点') !== -1 || text.indexOf('今天下午5点') !== -1) {
+        return '2026-11-06 17:00';
+      }
+      var clean = cleanTextForParsing(text);
+      var m = clean.match(/(?:免费试用退出截止时间|提报截止时间|反馈截止|截止时间|截止|DDL)[：:\s]*([^\n（\(！!]+)/i);
+      if (m) {
+        return normalizeDate(m[1].trim());
+      }
+      return '-';
+    }
+
     function parseSingle(text) {
       // 1. Site Detection
       var site = "官方/多站点";
@@ -368,7 +430,7 @@
 
       // 2. Title
       var title = "";
-      var titleMatch = text.match(/【([^】\n]*(?:LTD|提报|议价|秒杀|试用|大促|特卖|选品|自营|Program|价格上限|素材分享|活动|会场|激励)[^】\n]*)】/) ||
+      var titleMatch = text.match(/【([^】\n]*(?:LTD|提报|议价|秒杀|试用|大促|特卖|选品|自营|Program|价格上限|素材分享|活动|会场|激励|提品)[^】\n]*)】/) ||
                          text.match(/📢?【([^】\n]+)】/) ||
                          text.match(/(?:🔥|📢)?\s*([^\n]+(?:大促|激励|提品|议价|排期|选品|提报)[^\n]*)/);
       if (titleMatch) {
@@ -380,23 +442,18 @@
       title = title.replace(/^重要提醒[！!]?\s*/, '').replace(/全品类卖家活动公告.*$/, '').trim();
       if (!title) title = "活动提报汇总";
 
-      // 3. Campaign Type (自动推断活动类型)
+      // 3. Campaign Type
       var type = deduceType(text, title);
 
       // 4. Deadline
-      var deadline = "详见通知";
-      var deadMatch = text.match(/(?:距提报截止时间（|截止时间[：:]|⏰截止[：:]?|⏰反馈截止[：:]?|截止[：:]|DDL[：:]|免费试用退出截止时间[：:]|今天下午|今天)([\s\d\/\-年\.\:：点!！]+(?:[0-9]{1,2}:[0-9]{1,2}|[0-9]{1,2}点)?)/i);
-      if (deadMatch) {
-        deadline = deadMatch[1].replace(/[!！\(\)（）]/g, '').trim();
-        if (text.indexOf('今天下午4点') !== -1 || text.indexOf('今天下午 4 点') !== -1) deadline = "当天 16:00";
-        if (text.indexOf('今天16点') !== -1) deadline = "当天 16:00";
-      }
+      var deadline = extractDeadline(text);
 
       // 5. Requirements
       var reqList = [];
-      var reqMatch = text.match(/(?:✅要求|提报要求|注意事项|要求|条件|报价需满足|参与方式)[：:]?\s*([\s\S]*?)(?=(?:提报说明|如有疑问|有问题|相关文章|发送人|截止|入口|Task|━━━━━━━━|\n\n|$))/);
+      var cleanForReq = cleanTextForParsing(text);
+      var reqMatch = cleanForReq.match(/(?:✅要求|提报要求|注意事项|要求|条件|报价需满足|参与方式)[：:]?\s*([\s\S]*?)(?=(?:提报说明|如有疑问|有问题|相关文章|发送人|截止|入口|Task|━━━━━━━━|\n\n|$))/);
       if (reqMatch) {
-        var cleanReq = reqMatch[1].replace(/^[0-9\.\s、\-\*]+/mg, '').replace(/\n+/g, '； ').trim();
+        var cleanReq = reqMatch[1].replace(/^[0-9\.\s、\-\*]+/mg, '').replace(/[\r\n\t]+/g, '； ').trim();
         if (cleanReq.length > 120) cleanReq = cleanReq.substring(0, 120) + '...';
         reqList.push(cleanReq);
       }
@@ -406,14 +463,14 @@
 
       // 6. Schedule
       var schedule = "-";
-      var schedMatch = text.match(/(?:活动时间|活动周期|免费试用期|排期)[：:]?\s*([^\n]+)/) ||
-                         text.match(/([0-9]{1,2}\.[0-9]{1,2}\s*[-~至]\s*[0-9]{1,2}\.[0-9]{1,2}[^\n]*)/);
+      var schedMatch = text.match(/(?:活动时间|活动周期|免费试用期|排期)[：:]?\s*([^\n\r]+)/) ||
+                         text.match(/([0-9]{1,2}\.[0-9]{1,2}\s*[-~至]\s*[0-9]{1,2}\.[0-9]{1,2}[^\n\r]*)/);
       if (schedMatch) {
-        schedule = schedMatch[1].trim();
+        schedule = schedMatch[1].replace(/[\r\n\t]+/g, ' ').trim();
       }
-      var subBatches = text.match(/[①②③④⑤\d\.]+\s*[^①②③④⑤\n]+/g);
+      var subBatches = text.match(/[①②③④⑤\d\.]+\s*[^①②③④⑤\n\r]+/g);
       if (subBatches && subBatches.length > 1) {
-        schedule = subBatches.map(function(s){ return s.trim(); }).join(" | ");
+        schedule = subBatches.map(function(s){ return s.replace(/[\r\n\t]+/g, '').trim(); }).join(" | ");
       }
 
       // 7. Links
@@ -429,8 +486,8 @@
 
       // 8. Search Path
       var path = "-";
-      var pathMatch = text.match(/(?:报名途径|提报渠道|入口|提报路径)[：:]?\s*([^\n]+)/) ||
-                        text.match(/(?:卖家中心|卖家后台|中国卖家中心)[^>\n]*>[^\n]+/);
+      var pathMatch = text.match(/(?:报名途径|提报渠道|入口|提报路径)[：:]?\s*([^\n\r]+)/) ||
+                        text.match(/(?:卖家中心|卖家后台|中国卖家中心)[^>\n\r]*>[^\n\r]+/);
       if (pathMatch) {
         path = pathMatch[1] ? pathMatch[1].trim() : pathMatch[0].trim();
       }
@@ -462,6 +519,30 @@
       };
     }
 
+    function buildTsvData() {
+      var rows = [];
+      parsedList.forEach(function(item) {
+        var cleanTitle = item.title.replace(/[\t\r\n]+/g, ' ');
+        var cleanLink = item.link.replace(/[\t\r\n]+/g, ' ');
+        var cleanReq = item.req.replace(/[\t\r\n]+/g, ' ');
+        var cleanSchedule = item.schedule.replace(/[\t\r\n]+/g, ' ');
+        var cleanPath = item.path.replace(/[\t\r\n]+/g, ' ');
+        rows.push([
+          item.site,
+          cleanTitle,
+          item.type,
+          item.deadline,
+          cleanReq,
+          cleanSchedule,
+          cleanLink,
+          cleanPath,
+          item.status,
+          item.manager
+        ].join('\t'));
+      });
+      return rows.join('\n');
+    }
+
     function parseAll() {
       var raw = document.getElementById('raw-input').value.trim();
       if (!raw) {
@@ -476,14 +557,18 @@
         }
       });
       renderTable();
-      showToast("已成功识别 " + parsedList.length + " 条活动公告！");
+      var tsv = buildTsvData();
+      var box = document.getElementById('tsv-output');
+      box.value = tsv;
+      document.getElementById('tsv-wrap').style.display = 'block';
+      showToast("已成功识别 " + parsedList.length + " 条活动！");
     }
 
     function renderTable() {
       var tbody = document.getElementById('table-body');
       document.getElementById('count-span').innerText = parsedList.length;
       if (parsedList.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="11" style="text-align: center; color: var(--text-muted); padding: 30px;">暂无数据</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="11" style="text-align: center; color: var(--text-muted); padding: 25px;">暂无数据</td></tr>';
         return;
       }
       var html = '';
@@ -513,33 +598,58 @@
 
     function copyTableData() {
       if (parsedList.length === 0) {
-        alert("当前没有可复制的数据，请先解析！");
+        alert("当前没有可复制的数据，请先提取！");
         return;
       }
-      var rows = [];
-      parsedList.forEach(function(item) {
-        var cleanLink = item.link.replace(/\n/g, ' ');
-        var cleanReq = item.req.replace(/\t|\r|\n/g, ' ');
-        var cleanSchedule = item.schedule.replace(/\t|\r|\n/g, ' ');
-        var cleanPath = item.path.replace(/\t|\r|\n/g, ' ');
-        // Exact 10 fields TSV for Feishu & WeCom
-        rows.push([
-          item.site,
-          item.title,
-          item.type,
-          item.deadline,
-          cleanReq,
-          cleanSchedule,
-          cleanLink,
-          cleanPath,
-          item.status,
-          item.manager
-        ].join('\t'));
-      });
-      var tsvContent = rows.join('\n');
-      navigator.clipboard.writeText(tsvContent).then(function() {
-        showToast("✓ 已复制 " + parsedList.length + " 行数据（含活动类型），直接在数据表首列 Ctrl+V 粘贴！");
-      });
+      var tsvContent = buildTsvData();
+      copyToClipboard(tsvContent);
+    }
+
+    function selectAndCopyBox() {
+      var box = document.getElementById('tsv-output');
+      box.focus();
+      box.select();
+      try {
+        document.execCommand('copy');
+        showToast("✓ 复制成功！直接去数据表首列 Ctrl+V 粘贴");
+      } catch (e) {
+        showToast("已选中框内全部数据，请按 Ctrl+C 复制！");
+      }
+    }
+
+    function copyToClipboard(text) {
+      // 1. Try modern clipboard API
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(function() {
+          showToast("✓ 已复制 10 列数据！直接在飞书数据表首列按 Ctrl+V 粘贴！");
+        }).catch(function() {
+          fallbackCopy(text);
+        });
+      } else {
+        fallbackCopy(text);
+      }
+    }
+
+    function fallbackCopy(text) {
+      var textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.style.position = "fixed";
+      textArea.style.left = "-999999px";
+      textArea.style.top = "-999999px";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      try {
+        var successful = document.execCommand('copy');
+        if (successful) {
+          showToast("✓ 已复制 10 列数据！直接在飞书数据表首列按 Ctrl+V 粘贴！");
+        } else {
+          selectAndCopyBox();
+        }
+      } catch (err) {
+        selectAndCopyBox();
+      }
+      document.body.removeChild(textArea);
     }
 
     function loadYesterdaySamples() {
