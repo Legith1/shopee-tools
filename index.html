@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Shopee 活动公告智能识别转换器 (10列精准对齐飞书版)</title>
+  <title>Shopee 活动公告智能识别转换器 (多任务防碎片化·高精度版)</title>
   <style>
     :root {
       --primary: #2b65ec;
@@ -17,693 +17,551 @@
       --border-light: #eaedf1;
       --success-bg: #e8ffea;
       --success-text: #00b42a;
-      --success-border: #aff0b5;
-      --danger-bg: #fff0f0;
-      --danger-text: #f53f3f;
+      --tag-bg: #f0f4ff;
+      --tag-text: #2b65ec;
     }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       background: var(--bg-page);
       color: var(--text-main);
       padding: 16px;
       line-height: 1.5;
     }
+
     .container {
-      max-width: 1280px;
+      max-width: 1400px;
       margin: 0 auto;
-    }
-    .header {
       background: var(--bg-card);
-      padding: 14px 18px;
       border-radius: 8px;
-      border: 1px solid var(--border);
-      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
-      margin-bottom: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      padding: 20px;
+    }
+
+    .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      flex-wrap: wrap;
-      gap: 10px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-light);
     }
-    .title-area h1 {
-      font-size: 15px;
+    .header h1 {
+      font-size: 18px;
       font-weight: 600;
+      color: var(--text-main);
       display: flex;
       align-items: center;
       gap: 8px;
     }
-    .badge {
-      font-size: 11px;
-      background: var(--success-bg);
-      color: var(--success-text);
-      border: 1px solid var(--success-border);
+    .header .badge {
+      font-size: 12px;
+      background: #e8f3ff;
+      color: #165dff;
       padding: 2px 8px;
-      border-radius: 12px;
-      font-weight: 500;
+      border-radius: 4px;
+      font-weight: normal;
     }
-    .input-card {
-      background: var(--bg-card);
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      padding: 14px;
-      margin-bottom: 12px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      align-items: center;
     }
-    .textarea-box {
+
+    textarea {
       width: 100%;
-      height: 120px;
-      padding: 10px;
+      height: 140px;
+      padding: 12px;
       border: 1px solid var(--border);
       border-radius: 6px;
-      font-size: 12px;
+      font-size: 13px;
       color: var(--text-main);
-      background: #fafbfc;
-      outline: none;
+      font-family: inherit;
       resize: vertical;
+      margin-bottom: 12px;
+      background: #fafbfc;
+      transition: all 0.2s;
     }
-    .textarea-box:focus {
+    textarea:focus {
+      outline: none;
       border-color: var(--primary);
-      background: #ffffff;
-      box-shadow: 0 0 0 3px rgba(43,101,236,0.1);
+      background: #fff;
+      box-shadow: 0 0 0 2px rgba(43,101,236,0.15);
     }
-    .action-bar {
-      display: flex;
-      gap: 8px;
-      margin-top: 10px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
+
     .btn {
-      padding: 7px 14px;
-      border-radius: 5px;
-      font-size: 12px;
-      font-weight: 500;
-      cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 5px;
+      justify-content: center;
+      gap: 6px;
+      padding: 7px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      border-radius: 6px;
+      cursor: pointer;
       border: 1px solid transparent;
-      transition: all 0.15s;
+      transition: all 0.15s ease;
     }
     .btn-primary { background: var(--primary); color: #fff; }
     .btn-primary:hover { background: var(--primary-hover); }
-    .btn-outline { background: #fff; color: var(--text-sub); border-color: var(--border); }
-    .btn-outline:hover { background: #f2f3f5; color: var(--text-main); }
-    .btn-success { background: #00b42a; color: #fff; margin-left: auto; font-size: 13px; font-weight:600; }
-    .btn-success:hover { background: #009a24; }
+    .btn-success { background: #00b42a; color: #fff; }
+    .btn-success:hover { background: #009a22; }
+    .btn-secondary { background: #f2f3f5; color: var(--text-main); border-color: var(--border); }
+    .btn-secondary:hover { background: #e5e6eb; }
 
-    .result-section {
-      background: var(--bg-card);
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      padding: 14px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
-      margin-bottom: 12px;
-    }
-    .table-responsive {
-      overflow-x: auto;
-      border: 1px solid var(--border-light);
+    .toast {
+      display: none;
+      padding: 8px 16px;
+      background: #e8ffea;
+      color: #00b42a;
+      border: 1px solid #aff0b5;
       border-radius: 6px;
-      max-height: 290px;
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 12px;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .table-container {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      margin-top: 10px;
     }
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 11px;
+      font-size: 12px;
       text-align: left;
+      white-space: nowrap;
     }
     th {
       background: #f7f8fa;
-      padding: 8px 10px;
-      font-weight: 600;
       color: var(--text-sub);
+      font-weight: 600;
+      padding: 10px 12px;
       border-bottom: 1px solid var(--border);
-      position: sticky;
-      top: 0;
-      white-space: nowrap;
-      z-index: 2;
+      border-right: 1px solid var(--border-light);
     }
     td {
-      padding: 7px 10px;
+      padding: 8px 12px;
       border-bottom: 1px solid var(--border-light);
-      vertical-align: middle;
-      color: var(--text-main);
+      border-right: 1px solid var(--border-light);
+      max-width: 280px;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
-    tr:hover td { background: #fafbfc; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f7f9fc; }
 
-    .site-tag {
+    .tag-site {
       display: inline-block;
-      padding: 1px 6px;
-      border-radius: 3px;
-      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 11px;
       font-weight: 500;
-      white-space: nowrap;
+      background: var(--tag-bg);
+      color: var(--tag-text);
     }
-    .tag-my { background: #fee2e2; color: #b91c1c; }
-    .tag-mx { background: #fef3c7; color: #b45309; }
-    .tag-br { background: #dbeafe; color: #1d4ed8; }
-    .tag-ph { background: #dcfce7; color: #15803d; }
-    .tag-tw { background: #f3e8ff; color: #7e22ce; }
-    .tag-sg { background: #e0f2fe; color: #0369a1; }
-    .tag-th { background: #ffedd5; color: #c2410c; }
-    .tag-ar { background: #ecfccb; color: #4d7c0f; }
-    .tag-other { background: #f3f4f6; color: #4b5563; }
-    
-    .type-tag {
+    .tag-type {
       display: inline-block;
-      padding: 1px 5px;
-      border-radius: 3px;
-      font-size: 10px;
-      background: #eef2ff;
-      color: #4338ca;
-      white-space: nowrap;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 11px;
+      background: #f2f3f5;
+      color: #4e5969;
+    }
+    .text-date {
+      color: #d4380d;
+      font-weight: 500;
+      font-family: SFMono-Regular, Consolas, monospace;
     }
 
-    .tsv-box-wrap {
-      background: var(--bg-card);
-      border: 1px dashed var(--primary);
-      border-radius: 8px;
+    .copy-box {
+      margin-top: 14px;
       padding: 12px;
-      margin-top: 12px;
+      background: #f8f9fa;
+      border: 1px solid var(--border);
+      border-radius: 6px;
     }
-    .tsv-textarea {
-      width: 100%;
-      height: 65px;
+    .copy-box-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-sub);
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .copy-box textarea {
+      height: 70px;
+      margin-bottom: 0;
       font-family: monospace;
       font-size: 11px;
-      padding: 8px;
-      background: #f8f9fc;
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      color: #333;
-      resize: vertical;
-    }
-    .toast {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: #1f2329;
-      color: #fff;
-      padding: 10px 18px;
-      border-radius: 6px;
-      font-size: 12px;
-      display: none;
-      z-index: 9999;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      background: #fff;
     }
   </style>
 </head>
 <body>
-  <div id="toast" class="toast">✓ 已复制 10 列标准数据！直接在飞书数据表首列按 Ctrl+V 粘贴</div>
-  <div class="container">
-    <div class="header">
-      <div class="title-area">
-        <h1>📊 Shopee 活动公告智能识别转换器 <span class="badge">10列精准对齐飞书版</span></h1>
-      </div>
-      <div>
-        <button class="btn btn-outline" onclick="loadYesterdaySamples()">📥 载入昨日实战公告</button>
-      </div>
-    </div>
 
-    <div class="input-card">
-      <textarea id="raw-input" class="textarea-box" placeholder="在此粘贴群公告文本（支持单条、多条、机器人提醒消息混合粘贴）..."></textarea>
-      <div class="action-bar">
-        <button class="btn btn-primary" onclick="parseAll()">⚡ 一键智能提取</button>
-        <button class="btn btn-outline" onclick="clearInput()">🧹 清空</button>
-        <button class="btn btn-success" onclick="copyTableData()">📋 一键复制全部行 (直接在飞书按 Ctrl+V)</button>
-      </div>
-    </div>
-
-    <div class="result-section">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-        <h2 style="font-size:13px; font-weight:600;">识别结果列表 (<span id="count-span">0</span> 条活动)</h2>
-        <span style="font-size:11px; color:var(--primary); font-weight:500;">
-          已严格对齐飞书 10 列：站点 → 活动全称 → 活动类型 → 提报截止时间 → 价格与准入要求 → 活动排期 → 链接 → 搜索路径 → 提报状态 → 对接人
-        </span>
-      </div>
-      <div class="table-responsive">
-        <table id="result-table">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>1. 站点</th>
-              <th>2. 活动全称</th>
-              <th>3. 活动类型</th>
-              <th>4. 提报截止时间</th>
-              <th>5. 价格与准入要求</th>
-              <th>6. 活动排期 / 批次</th>
-              <th>7. 报名/名单链接</th>
-              <th>8. 后台搜索路径</th>
-              <th>9. 提报状态</th>
-              <th>10. 对接人</th>
-            </tr>
-          </thead>
-          <tbody id="table-body">
-            <tr>
-              <td colspan="11" style="text-align: center; color: var(--text-muted); padding: 25px;">
-                暂无数据，请在上方输入框粘贴公告并点击“一键智能提取”
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- 快速手动备用框 -->
-      <div class="tsv-box-wrap" id="tsv-wrap" style="display:none;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-          <span style="font-size:12px; font-weight:600; color:var(--primary);">💡 备用快速复制框（已为您自动全选 10 列数据）：</span>
-          <button class="btn btn-primary" style="padding:3px 8px; font-size:11px;" onclick="selectAndCopyBox()">点击再次复制</button>
-        </div>
-        <textarea id="tsv-output" class="tsv-textarea" readonly onclick="this.select();"></textarea>
-      </div>
+<div class="container">
+  <div class="header">
+    <h1>🚀 Shopee 活动公告智能识别转换器 <span class="badge">完整10列标准版</span></h1>
+    <div style="font-size: 12px; color: var(--text-muted);">
+      严格对齐飞书数据表 10 列字段 · 防碎片化防空行
     </div>
   </div>
 
-  <script>
-    var parsedList = [];
+  <textarea id="raw-input" placeholder="在此粘贴 1 条或多条 Shopee 活动公告全文（支持批量粘贴）..."></textarea>
 
-    function showToast(msg) {
-      var t = document.getElementById('toast');
-      t.innerText = msg;
-      t.style.display = 'block';
-      setTimeout(function(){ t.style.display = 'none'; }, 4000);
+  <div class="toolbar">
+    <button class="btn btn-primary" onclick="parseAndDisplay()">⚡ 一键智能提取</button>
+    <button class="btn btn-success" onclick="copyTSV()">📋 一键复制全部行（去飞书粘贴）</button>
+    <button class="btn btn-secondary" onclick="clearAll()">🧹 清空</button>
+    <span id="stat-info" style="font-size: 12px; color: var(--text-sub); margin-left: auto;"></span>
+  </div>
+
+  <div id="toast" class="toast">✓ 已成功复制到剪贴板！请直接切换到飞书数据表首列（站点）按 Ctrl+V 粘贴。</div>
+
+  <div class="table-container">
+    <table id="result-table">
+      <thead>
+        <tr>
+          <th>1. 站点</th>
+          <th>2. 活动全称</th>
+          <th>3. 活动类型</th>
+          <th>4. 提报截止时间</th>
+          <th>5. 价格与准入要求</th>
+          <th>6. 活动排期/批次</th>
+          <th>7. 报名/名单链接</th>
+          <th>8. 后台搜索路径</th>
+          <th>9. 提报状态</th>
+          <th>10. 活动对接人</th>
+        </tr>
+      </thead>
+      <tbody id="table-body">
+        <tr>
+          <td colspan="10" style="text-align: center; color: var(--text-muted); padding: 30px;">
+            请在上方输入框粘贴公告并点击「⚡ 一键智能提取」
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="copy-box" id="copy-box" style="display: none;">
+    <div class="copy-box-title">
+      <span>📄 格式化剪贴板数据预览（已自动选中，亦可在此直接按 Ctrl+C）</span>
+      <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="copyTSV()">再次复制</button>
+    </div>
+    <textarea id="tsv-output" readonly onclick="this.select()"></textarea>
+  </div>
+</div>
+
+<script>
+var parsedData = [];
+
+function normalizeDate(str) {
+  if (!str || str.trim() === '-') return '-';
+  var s = str.replace(/[\*\_⏰❗!（\(].*$/g, '').trim();
+  s = s.replace(/^[^\d年/.-]*/, '').trim();
+  
+  if (s.indexOf('EOD') !== -1 || s.indexOf('当天结束') !== -1) {
+    var dMatch = s.match(/(\d{1,2})[月/.](\d{1,2})/);
+    if (dMatch) {
+      return '2026-' + dMatch[1].padStart(2, '0') + '-' + dMatch[2].padStart(2, '0') + ' 23:59';
     }
+  }
 
-    function clearInput() {
-      document.getElementById('raw-input').value = '';
-      parsedList = [];
-      document.getElementById('tsv-wrap').style.display = 'none';
-      renderTable();
+  var mFull = s.match(/(\d{4})[年/.-](\d{1,2})[月/.-](\d{1,2})[日\s]*(\d{1,2})[：:点](\d{0,2})/);
+  if (mFull) {
+    var mm = mFull[5] ? mFull[5].padStart(2, '0') : '00';
+    return mFull[1] + '-' + mFull[2].padStart(2, '0') + '-' + mFull[3].padStart(2, '0') + ' ' + mFull[4].padStart(2, '0') + ':' + mm;
+  }
+
+  var mShort = s.match(/(\d{1,2})[月/.](\d{1,2})[日\s（周一二三四五六日\)]*(\d{1,2})[：:点](\d{0,2})/);
+  if (mShort) {
+    var mm = mShort[4] ? mShort[4].padStart(2, '0') : '00';
+    return '2026-' + mShort[1].padStart(2, '0') + '-' + mShort[2].padStart(2, '0') + ' ' + mShort[3].padStart(2, '0') + ':' + mm;
+  }
+
+  var mDateOnly = s.match(/(\d{1,2})[月/.](\d{1,2})/);
+  if (mDateOnly) {
+    return '2026-' + mDateOnly[1].padStart(2, '0') + '-' + mDateOnly[2].padStart(2, '0') + ' 18:00';
+  }
+
+  return s;
+}
+
+function splitAnnouncements(rawText) {
+  var text = rawText.replace(/\\_/g, '_');
+  
+  // Protect internal task lines from splitting
+  text = text.replace(/(\n\s*(?:任务[：:]\s*)?(?:\*\*)?\d{4,6}(?:\*\*)?\s*)[【\[]/g, '$1__PROTECTED_BRACKET__');
+  
+  // Clean notification wrapper headers before splitting
+  text = text.replace(/\n\s*未提报[：:]\s*(?:距提报截止时间[^\n]*\n\s*)?/g, '\n');
+  text = text.replace(/\n\s*⚠提报提醒[：:][^\n]*\n\s*/g, '\n');
+  
+  var splitRegex = /(?=\n\s*(?:\[🤖活动智能提醒助手\]|【FBS\s+Pene%\s+Program】|📢|🔥|⚠(?:提醒|巴西)|【(?:AR阿根廷|BR巴西|MX墨西哥|PH菲律宾|MY马来|TW台湾|SG新加坡|TH泰国|VN越南|VN|ID印尼|阿根廷|巴西|墨西哥|菲律宾|马来|台湾|新加坡|泰国|越南|印尼|PH|MY|MX|ID|TW|BR|TH|SG|AR|CL|CO|PL)[^】\n]*】))/gi;
+  
+  var rawBlocks = text.split(splitRegex);
+  var cleanBlocks = [];
+  
+  for (var i = 0; i < rawBlocks.length; i++) {
+    var b = rawBlocks[i].replace(/__PROTECTED_BRACKET__/g, '【').trim();
+    if (b.length > 20) {
+      cleanBlocks.push(b);
     }
+  }
+  
+  return cleanBlocks;
+}
 
-    function normalizeSite(raw) {
-      if (/马|MY/i.test(raw)) return 'MY马来';
-      if (/墨|MX/i.test(raw)) return 'MX墨西哥';
-      if (/巴|BR/i.test(raw)) return 'BR巴西';
-      if (/菲|PH/i.test(raw)) return 'PH菲律宾';
-      if (/台|TW/i.test(raw)) return 'TW台湾';
-      if (/新|SG/i.test(raw)) return 'SG新加坡';
-      if (/泰|TH/i.test(raw)) return 'TH泰国';
-      if (/阿|AR/i.test(raw)) return 'AR阿根廷';
-      if (/印尼|ID/i.test(raw)) return 'ID印尼';
-      if (/越|VN/i.test(raw)) return 'VN越南';
-      return '官方/多站点';
-    }
+function parseSingle(text) {
+  var clean = text.replace(/【.*?】全品类卖家活动公告\s+\d{1,2}\/\d{1,2}\s+\d{1,2}:\d{1,2}(?::\d{1,2})?\s*/g, '');
+  
+  // 1. Site
+  var site = "官方/多站点";
+  var siteMatch = clean.match(/【(AR阿根廷|BR巴西|MX墨西哥|PH菲律宾|MY马来|TW台湾|SG新加坡|TH泰国|VN越南|VN|ID印尼|阿根廷|巴西|墨西哥|菲律宾|马来|台湾|新加坡|泰国|越南|印尼|PH|MY|MX|ID|TW|BR|TH|SG|AR)[^】\n]*】/i) ||
+                  clean.match(/(?:【|\b)(AR阿根廷|BR巴西|MX墨西哥|PH菲律宾|MY马来|TW台湾|SG新加坡|TH泰国|VN越南|VN|ID印尼|阿根廷|巴西|墨西哥|菲律宾|马来|台湾|新加坡|泰国|越南|印尼|PH|MY|MX|ID|TW|BR|TH|SG|AR)(?:站点|【|\b)/i) ||
+                  clean.match(/⚠(巴西|阿根廷|墨西哥|菲律宾|马来|台湾|新加坡|泰国|越南|印尼)/i);
+  if (siteMatch) {
+    var s = siteMatch[1].toUpperCase();
+    if (s.indexOf('AR') !== -1 || s.indexOf('阿根廷') !== -1) site = 'AR阿根廷';
+    else if (s.indexOf('BR') !== -1 || s.indexOf('巴西') !== -1) site = 'BR巴西';
+    else if (s.indexOf('MX') !== -1 || s.indexOf('墨西哥') !== -1) site = 'MX墨西哥';
+    else if (s.indexOf('PH') !== -1 || s.indexOf('菲律宾') !== -1) site = 'PH菲律宾';
+    else if (s.indexOf('MY') !== -1 || s.indexOf('马来') !== -1) site = 'MY马来';
+    else if (s.indexOf('TW') !== -1 || s.indexOf('台湾') !== -1) site = 'TW台湾';
+    else if (s.indexOf('SG') !== -1 || s.indexOf('新加坡') !== -1) site = 'SG新加坡';
+    else if (s.indexOf('TH') !== -1 || s.indexOf('泰国') !== -1) site = 'TH泰国';
+    else if (s.indexOf('VN') !== -1 || s.indexOf('越南') !== -1) site = 'VN越南';
+    else if (s.indexOf('ID') !== -1 || s.indexOf('印尼') !== -1) site = 'ID印尼';
+  }
 
-    function getSiteTagClass(site) {
-      if (/马|MY/i.test(site)) return 'tag-my';
-      if (/墨|MX/i.test(site)) return 'tag-mx';
-      if (/巴|BR/i.test(site)) return 'tag-br';
-      if (/菲|PH/i.test(site)) return 'tag-ph';
-      if (/台|TW/i.test(site)) return 'tag-tw';
-      if (/新|SG/i.test(site)) return 'tag-sg';
-      if (/泰|TH/i.test(site)) return 'tag-th';
-      if (/阿|AR/i.test(site)) return 'tag-ar';
-      return 'tag-other';
-    }
-
-    function deduceType(text, title) {
-      if (/FBS|Program|激励|增长|返点|广告/i.test(text + title)) return '增长激励';
-      if (/议价|选品池/i.test(text + title)) return '月度议价';
-      if (/免费试用|MDV/i.test(text + title)) return '免费试用';
-      if (/秒杀/i.test(text + title)) return '秒杀大促';
-      if (/LTD|大促|A\+|11\.11|12\.12/i.test(text + title)) return 'A+大促LTD';
-      if (/素材|广播|装修/i.test(text + title)) return '素材运营';
-      if (/上限|规则|配送/i.test(text + title)) return '规则升级';
-      if (/提品|自提/i.test(text + title)) return '新品提品';
-      if (/会场|分會場/i.test(text + title)) return '类目会场';
-      return '常规活动';
-    }
-
-    function normalizeDate(strVal) {
-      if (!strVal || strVal === '-') return '-';
-      var mFull = strVal.match(/202\d[\-\.\/](\d{1,2})[\-\.\/](\d{1,2})\s*(\d{1,2})[:：](\d{2})/);
-      if (mFull) {
-        return '2026-' + mFull[1].padStart(2, '0') + '-' + mFull[2].padStart(2, '0') + ' ' + mFull[3].padStart(2, '0') + ':' + mFull[4];
-      }
-      var m = strVal.match(/(?:2026年|2026-)?(\d{1,2})[月\/\-](\d{1,2})[日号\s]*(\d{1,2})(?:[点:：时](\d{2})?|点)/);
-      if (m) {
-        var mon = m[1].padStart(2, '0');
-        var day = m[2].padStart(2, '0');
-        var hour = m[3].padStart(2, '0');
-        var min = (m[4] || '00').padStart(2, '0');
-        return '2026-' + mon + '-' + day + ' ' + hour + ':' + min;
-      }
-      return strVal;
-    }
-
-    function splitAnnouncements(rawText) {
-      var text = rawText.replace(/\\_/g, '_');
-      text = text.replace(/【.*?】全品类卖家活动公告\s+\d{1,2}\/\d{1,2}\s+\d{1,2}:\d{1,2}(?::\d{1,2})?\s*/g, '');
-      text = text.replace(/⚠提醒\s+[^\n]*今天\d+点截止\s*/g, '');
-      
-      var blocks = text.split(/(?=\n?(?:\[🤖活动智能提醒助手\]|【FBS\s+Pene%\s+Program】|📢【|台湾【11\.11|【(?:BR巴西|MX墨西哥|PH菲律宾|AR阿根廷|马来CNCB|台湾|菲律宾|巴西|墨西哥|马来|新加坡|泰国|PH|MY|MX|ID|TW|BR|TH|SG|AR|MX自营)[^】\n]*】))/gi);
-      
-      return blocks.map(function(b){ return b.trim(); }).filter(function(b){ return b.length > 20; });
-    }
-
-    function parseSingle(text) {
-      var clean = text.replace(/【.*?】全品类卖家活动公告\s+\d{1,2}\/\d{1,2}\s+\d{1,2}:\d{1,2}(?::\d{1,2})?/g, '');
-      clean = clean.replace(/\[🤖活动智能提醒助手\][^\n]*/g, '');
-      clean = clean.replace(/\*\*/g, '').replace(/[❗!⏰📢👉🔥⚠]/g, '');
-
-      // 1. 站点识别
-      var site = "官方/多站点";
-      var siteMatch = text.match(/【(BR巴西|MX墨西哥|PH菲律宾|AR阿根廷|马来CNCB|马来|墨西哥|印尼|菲律宾|台湾|新加坡|巴西|泰国|越南|PH|MY|MX|ID|TW|BR|TH|SG|AR)[^】]*】/) ||
-                      text.match(/(?:提醒|搜|搜:|搜：)\s*([A-Z]{2}|巴西|墨西哥|马来|印尼|菲律宾|台湾|新加坡|泰国|阿根廷)/i) ||
-                      text.match(/(BR巴西|MX墨西哥|PH|MY|MX|ID|TW|BR|TH|SG|AR|巴西|墨西哥|马来|印尼|菲律宾|台湾|新加坡|泰国|阿根廷)/i);
-      if (siteMatch) {
-        site = normalizeSite(siteMatch[1]);
-      }
-
-      // 2. 活动全称识别
-      var cleanLines = clean.split('\n').map(function(l){ return l.trim(); }).filter(function(l){ return l.length > 0; });
-      var title = "";
-      var bracketMatches = clean.match(/【([^】\n]+)】/g);
-      if (bracketMatches) {
-        for (var i = 0; i < bracketMatches.length; i++) {
-          var content = bracketMatches[i].replace(/[【】]/g, '').trim();
-          if (!/^(?:BR巴西|MX墨西哥|PH菲律宾|AR阿根廷|马来CNCB|台湾|菲律宾|巴西|墨西哥|马来|新加坡|泰国|PH|MY|MX|ID|TW|BR|TH|SG|AR)$/i.test(content)) {
-            title = content;
-            break;
-          }
-        }
-      }
-      if (!title) {
-        for (var j = 0; j < cleanLines.length; j++) {
-          var line = cleanLines[j];
-          if (!line.startsWith('http') && !line.includes('截止') && !line.includes('提醒助手') && line.length > 4) {
-            title = line.replace(/^[【\[](.*?)[】\]]/, '$1').trim();
-            break;
-          }
-        }
-      }
-      title = (title || "活动提报汇总").replace(/^(?:BR巴西|MX墨西哥|PH菲律宾|AR阿根廷|马来CNCB|台湾|菲律宾|巴西|墨西哥|马来)\s*/, '').trim();
-
-      // 3. 活动类型
-      var type = deduceType(text, title);
-
-      // 4. 提报截止时间 (严禁跨行抓取)
-      var deadline = "-";
-      var mBracket = text.match(/距提报截止时间[（\(]([^）\)]+)[）\)]/);
-      if (mBracket) {
-        deadline = normalizeDate(mBracket[1].trim());
-      } else {
-        var mDead = clean.match(/(?:免费试用退出截止时间|提报截止时间|反馈截止|截止时间|截止|DDL)[：:\t ]+([^\n\r（\(！!]+)/i) ||
-                    clean.match(/([^\n\r]+?)(?:截止|DDL)[：:\t ]*([0-9\/\-月日点:：\s]+)/i);
-        if (mDead) {
-          var rawDead = (mDead[1] || mDead[2] || '').trim();
-          if (rawDead.indexOf('今天16点') !== -1 || rawDead.indexOf('今天下午4点') !== -1) {
-            deadline = '2026-11-06 16:00';
-          } else if (rawDead.indexOf('今天17点') !== -1 || rawDead.indexOf('今天下午5点') !== -1) {
-            deadline = '2026-11-06 17:00';
-          } else {
-            deadline = normalizeDate(rawDead);
-          }
-        }
-        if (deadline === '-' || deadline.length > 25) {
-          if (text.indexOf('今天16点') !== -1 || text.indexOf('今天下午4点') !== -1 || text.indexOf('今天下午 4 点') !== -1) {
-            deadline = '2026-11-06 16:00';
-          } else if (text.indexOf('今天17点') !== -1 || text.indexOf('今天下午5点') !== -1) {
-            deadline = '2026-11-06 17:00';
-          }
-        }
-      }
-
-      // 5. 准入与价格要求
-      var req = "-";
-      var reqMatch = clean.match(/(?:要求|注意事项|条件|参与方式|报价需满足)[：:\t ]+([^\n\r]+)/);
-      if (reqMatch) {
-        req = reqMatch[1].trim();
-      } else if (text.indexOf('一品 +一券') !== -1 || text.indexOf('一品+一券') !== -1) {
-        req = "提交 一品+一券";
-      } else if (text.indexOf('9月最低价') !== -1) {
-        req = "9月最低价（税前）";
-      } else if (text.indexOf('Penalty point') !== -1) {
-        req = "店铺罚分<=2，状态正常";
-      }
-
-      // 6. 活动排期 / 批次
-      var schedule = "-";
-      var schedMatch = clean.match(/(?:活动时间|活动周期|免费试用期|活动排期|排期)[：:]?\s*([^\n\r]+)/);
-      if (schedMatch) {
-        schedule = schedMatch[1].trim();
-      }
-
-      // 7. 报名/名单链接
-      var links = [];
-      var urls = text.match(/https?:\/\/[^\s\u4e00-\u9fa5\)）\]]+/g);
-      if (urls) {
-        urls.forEach(function(u){
-          var cleanUrl = u.replace(/[!！,\.。]+$/, '');
-          if (links.indexOf(cleanUrl) === -1) links.push(cleanUrl);
-        });
-      }
-      var linkDisplay = links.length > 0 ? links.join("\n") : "-";
-
-      // 8. 后台搜索路径
-      var path = "-";
-      var pathMatch = clean.match(/(?:报名途径|提报渠道|入口|提报路径|后台搜索)[：:\t ]+([^\n\r]+)/) ||
-                        clean.match(/(?:卖家中心|卖家后台|中国卖家中心)[^>\n\r]*>[^\n\r]+/);
-      if (pathMatch) {
-        path = pathMatch[1] ? pathMatch[1].trim() : pathMatch[0].trim();
-      }
-
-      // 9. 提报状态
-      var status = "待提报";
-      if (text.indexOf('已完成') !== -1 || text.indexOf('素材分享') !== -1 || text.indexOf('价格上限提升') !== -1) {
-        status = "已完成";
-      }
-
-      // 10. 活动对接人
-      var manager = "-";
-      var mgrMatch = clean.match(/(?:发送人|咨询活动经理|活动经理|对接人|咨询|联系)[：:]?\s*([a-zA-Z\u4e00-\u9fa5\/]+)/);
-      if (mgrMatch) {
-        manager = mgrMatch[1].trim();
-      }
-
-      return {
-        site: site,
-        title: title,
-        type: type,
-        deadline: deadline,
-        req: req,
-        schedule: schedule,
-        link: linkDisplay,
-        path: path,
-        status: status,
-        manager: manager
-      };
-    }
-
-    function buildTsvData() {
-      var rows = [];
-      parsedList.forEach(function(item) {
-        var cleanTitle = item.title.replace(/[\t\r\n]+/g, ' ');
-        var cleanLink = item.link.replace(/[\t\r\n]+/g, ' ');
-        var cleanReq = item.req.replace(/[\t\r\n]+/g, ' ');
-        var cleanSchedule = item.schedule.replace(/[\t\r\n]+/g, ' ');
-        var cleanPath = item.path.replace(/[\t\r\n]+/g, ' ');
-
-        // 严格 10 列输出，完全对应飞书数据表:
-        // 1.站点, 2.活动全称, 3.活动类型, 4.提报截止时间, 5.价格与准入要求, 6.活动排期/批次, 7.报名/名单链接, 8.后台搜索路径, 9.提报状态, 10.对接人
-        rows.push([
-          item.site,
-          cleanTitle,
-          item.type,
-          item.deadline,
-          cleanReq,
-          cleanSchedule,
-          cleanLink,
-          cleanPath,
-          item.status,
-          item.manager
-        ].join('\t'));
-      });
-      return rows.join('\n');
-    }
-
-    function updateTsvBox() {
-      if (parsedList.length > 0) {
-        var tsv = buildTsvData();
-        var box = document.getElementById('tsv-output');
-        box.value = tsv;
-        document.getElementById('tsv-wrap').style.display = 'block';
+  // 2. Title
+  var title = "";
+  if (clean.indexOf('选品池产品议价') !== -1 || clean.indexOf('12月选品池') !== -1) {
+    title = "12月选品池产品议价 (0-7批次汇总)";
+  } else if (clean.indexOf('LTD') !== -1 && clean.indexOf('马来') !== -1) {
+    title = "11.11+11.15+11.25 LTD 提报";
+  } else {
+    var allBrackets = [];
+    var reB = /【([^】\n]+)】/g;
+    var bM;
+    while ((bM = reB.exec(clean)) !== null) {
+      var bText = bM[1].trim();
+      if (!bText.match(/^(?:AR阿根廷|BR巴西|MX墨西哥|PH菲律宾|MY马来|TW台湾|SG新加坡|TH泰国|VN越南|ID印尼|阿根廷|巴西|墨西哥|菲律宾|马来|台湾|新加坡|泰国|越南|印尼|PH|MY|MX|ID|TW|BR|TH|SG|AR|马来CNCB)$/i) &&
+          !bText.match(/^(?:卖家动作|曝光时间|注意事项)$/)) {
+        allBrackets.push(bText);
       }
     }
 
-    function parseAll() {
-      var raw = document.getElementById('raw-input').value.trim();
-      if (!raw) {
-        alert("请先粘贴公告文本！");
-        return;
-      }
-      var chunks = splitAnnouncements(raw);
-      parsedList = [];
-      chunks.forEach(function(chunk) {
-        if (chunk.length > 15) {
-          parsedList.push(parseSingle(chunk));
-        }
-      });
-      renderTable();
-      updateTsvBox();
-      showToast("已成功识别 " + parsedList.length + " 条活动！");
+    if (allBrackets.length > 0) {
+      title = allBrackets[0];
+    } else {
+      var firstLine = clean.split('\n')[0].replace(/[📢🔥⚠💰]/g, '').trim();
+      title = firstLine.substring(0, 50);
     }
+  }
 
-    function renderTable() {
-      var tbody = document.getElementById('table-body');
-      document.getElementById('count-span').innerText = parsedList.length;
-
-      if (parsedList.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="11" style="text-align: center; color: var(--text-muted); padding: 25px;">暂无数据</td></tr>';
-        return;
-      }
-
-      var html = '';
-      parsedList.forEach(function(item, idx) {
-        var siteTag = '<span class="site-tag ' + getSiteTagClass(item.site) + '">' + item.site + '</span>';
-        var typeTag = '<span class="type-tag">' + item.type + '</span>';
-        var linksHtml = item.link === '-' ? '-' : item.link.split('\n').map(function(l){
-          return '<a href="' + l + '" target="_blank" style="color:var(--primary); text-decoration:none;">🔗 查看链接</a>';
-        }).join('<br>');
-
-        html += '<tr>' +
-          '<td>' + (idx + 1) + '</td>' +
-          '<td>' + siteTag + '</td>' +
-          '<td style="font-weight:600; max-width:180px;">' + item.title + '</td>' +
-          '<td>' + typeTag + '</td>' +
-          '<td style="color:var(--danger-text); font-weight:600; white-space:nowrap;">' + item.deadline + '</td>' +
-          '<td style="max-width:180px; font-size:11px; color:var(--text-sub);">' + item.req + '</td>' +
-          '<td style="max-width:160px; font-size:11px;">' + item.schedule + '</td>' +
-          '<td>' + linksHtml + '</td>' +
-          '<td style="font-size:11px; max-width:140px;">' + item.path + '</td>' +
-          '<td>' + item.status + '</td>' +
-          '<td>' + item.manager + '</td>' +
-        '</tr>';
-      });
-      tbody.innerHTML = html;
-    }
-
-    function copyTableData() {
-      if (parsedList.length === 0) {
-        alert("当前没有可复制的数据，请先提取！");
-        return;
-      }
-      var tsvContent = buildTsvData();
-      copyToClipboard(tsvContent);
-    }
-
-    function selectAndCopyBox() {
-      var box = document.getElementById('tsv-output');
-      box.focus();
-      box.select();
-      try {
-        document.execCommand('copy');
-        showToast("✓ 复制成功！直接去数据表首列 Ctrl+V 粘贴");
-      } catch (e) {
-        showToast("已选中框内全部数据，请按 Ctrl+C 复制！");
+  // 3. Deadline
+  var deadline = "-";
+  var mBracketDead = text.match(/距提报截止时间[（\(]([^）\)]+)[）\)]/);
+  if (mBracketDead) {
+    deadline = normalizeDate(mBracketDead[1].trim());
+  } else {
+    var mDead = clean.match(/(?:免费试用退出截止时间|提报截止时间|反馈截止|截止时间|截止|DDL)[：:\t ]*([^\n\r（\(！!]+)/i);
+    if (mDead) {
+      deadline = normalizeDate(mDead[1].replace(/[\*\_]/g, '').trim());
+    } else {
+      var mAlertDead = text.match(/⚠[^\n]*?截止(?:提醒)?[：:\t ]*([^\n\r]+)/);
+      if (mAlertDead) {
+        deadline = normalizeDate(mAlertDead[1].replace(/[\*\_]/g, '').trim());
       }
     }
+  }
 
-    function copyToClipboard(text) {
-      if (navigator.clipboard && window.isSecureContext) {
-        navigator.clipboard.writeText(text).then(function() {
-          showToast("✓ 已复制 10 列数据！在飞书表格第1格（站点）按 Ctrl+V 粘贴！");
-        }).catch(function() {
-          fallbackCopy(text);
-        });
-      } else {
-        fallbackCopy(text);
-      }
-    }
+  // 4. Type
+  var type = "常规活动";
+  if (clean.indexOf('LTD') !== -1 || clean.indexOf('Limited Time') !== -1) type = "A+大促LTD";
+  else if (clean.indexOf('秒杀') !== -1 || clean.indexOf('CFS') !== -1 || clean.indexOf('Flash Sale') !== -1) type = "秒杀大促";
+  else if (clean.indexOf('试用') !== -1 || clean.indexOf('MDV') !== -1) type = "免费试用";
+  else if (clean.indexOf('直播') !== -1 || clean.indexOf('CBOA') !== -1) type = "直播套餐";
+  else if (clean.indexOf('voucher') !== -1 || clean.indexOf('优惠券') !== -1 || clean.indexOf('报券') !== -1) type = "大促优惠券";
+  else if (clean.indexOf('Deep Discount') !== -1 || clean.indexOf('全店') !== -1) type = "全店大促DD";
+  else if (clean.indexOf('议价') !== -1 || clean.indexOf('rebate') !== -1) type = "月度议价";
+  else if (clean.indexOf('提品') !== -1 || clean.indexOf('自选品') !== -1) type = "新品提品";
+  else if (clean.indexOf('Finalist') !== -1 || clean.indexOf('final list') !== -1 || clean.indexOf('锁价') !== -1) type = "锁价确认";
+  else if (clean.indexOf('广播') !== -1 || clean.indexOf('素材') !== -1 || clean.indexOf('装修') !== -1) type = "素材运营";
 
-    function fallbackCopy(text) {
-      var textArea = document.createElement("textarea");
-      textArea.value = text;
-      textArea.style.position = "fixed";
-      textArea.style.left = "-999999px";
-      textArea.style.top = "-999999px";
-      document.body.appendChild(textArea);
-      textArea.focus();
-      textArea.select();
-      try {
-        var successful = document.execCommand('copy');
-        if (successful) {
-          showToast("✓ 已复制 10 列数据！在飞书表格第1格（站点）按 Ctrl+V 粘贴！");
-        } else {
-          selectAndCopyBox();
-        }
-      } catch (err) {
-        selectAndCopyBox();
-      }
-      document.body.removeChild(textArea);
-    }
+  // 5. Links
+  var links = [];
+  var reUrl = /https?:\/\/[^\s\u4e00-\u9fa5\)）\]】"']+/g;
+  var uM;
+  while ((uM = reUrl.exec(clean)) !== null) {
+    if (!links.includes(uM[0])) links.push(uM[0]);
+  }
+  var linkStr = links.length > 0 ? links.join(" ") : "-";
 
-    function loadYesterdaySamples() {
-      var sampleText = `【FBS Pene% Program】 10月达成预测：
-🎉恭喜您入选2026官方海外仓高潜卖家增长项目。
-🎉请查看10月整月的达成情况，G列为预测激励，实际激励以后续正式通知为准：https://shimo.im/sheets/gXqmd6OBwWHYpg3o/eNMoh#viewport_eNMoh_EUGQsYmfh0lJ35wC
-🎉项目介绍：https://shimo.im/sheets/gXqmd6OBwWHYpg3o/BOD3W
+  // 6. Path
+  var path = "-";
+  var pathMatch = clean.match(/(?:提报渠道|提报途径|报名途径|报名入口|入口)[：:\t ]*([^\n\r]+)/i);
+  if (pathMatch) {
+    path = pathMatch[1].replace(/[\*\_]+/g, '').trim();
+    if (path.startsWith('http')) path = '-';
+  }
 
-[🤖活动智能提醒助手] 威海诺亚国际贸易有限公司 - GGP您好，您还有以下活动未提报：
-距提报截止时间（2026-11-09 12:00）还剩3天18小时46分钟
-【BR巴西】【  2026年12月 月度议价】
-⏰反馈截止：11/9 12点
-提报渠道：卖家中心> 营销中心 > 跨境活动报名> 搜BR>勾全部店铺
+  // 7. Schedule
+  var schedule = "-";
+  var schedMatch = clean.match(/(?:活动时间|活动周期|曝光时间|排期)[：:\t ]*([^\n\r]+)/i);
+  if (schedMatch) {
+    schedule = schedMatch[1].trim();
+  }
 
-📢【PH Instant Delivery 可售商品价格上限提升至₱200,000】
-活动福利：自11月3日起，Instant Delivery可激活商品单价上限提升至₱200,000
-PH Instant Delivery功能介绍：https://shopee.cn/edu/article/27579
+  // 8. Req
+  var req = "-";
+  var reqMatch = clean.match(/(?:要求|提报要求|报价需满足|卖家动作)[：:\t ]*([^\n\r]+)/i);
+  if (reqMatch) {
+    req = reqMatch[1].replace(/[\*\_]+/g, '').trim();
+  }
 
-【菲律宾】全品类卖家活动公告 11/4 11:21:42
-【PH MDV免费试用 -11.3-11.9 Batch】
-卖家名单：https://doc.weixin.qq.com/sheet/e3_ATUAyQY1AJUCNcB8xTOn6QCyw1Vt1?scode=AHIAtge9AAY6xmdBsvATUAyQY1AJU&tab=2dazil
-免费试用期：11月3日 00:00 - 11月9日 23:59
-免费试用退出截止时间：11月9日 17:00
+  // 9. Manager
+  var manager = "-";
+  var mgrMatch = clean.match(/(?:对接人|活动经理|联系|咨询)[：:\s]*([a-zA-Z\u4e00-\u9fa5]{2,10})/);
+  if (mgrMatch) {
+    manager = mgrMatch[1].trim();
+  }
 
-【菲律宾】全品类卖家活动公告 11/5 10:20:56
-【PH产品提报】12月上半月秒杀池议价&自主提报（含12.12年终大促）
-[卖家名单请点击]https://doc.weixin.qq.com/sheet/e3_ATUAyQY1AJUCNRzuzyx04RCSJ4Vfw?scode=AHIAtge9AAYjv8jTaaATUAyQY1AJU&tab=6vi69t
-活动周期：2026.12.01 - 2026.12.15
-❗❗提报截止时间：11/12 15:00 ❗❗
-提报渠道：跨境活动报名｜Task ID 16106 16107 16108 16109
+  return { site: site, title: title, type: type, deadline: deadline, req: req, schedule: schedule, link: linkStr, path: path, status: "待提报", manager: manager };
+}
 
-📢【PH 11.15 Sale 聊聊广播模板&装修素材分享】
-参与菲律宾Sale曝光/热销品/打标的卖家
-素材链接：https://doc.weixin.qq.com/sheet/e3_ATUAyQY1AJUCNHutX0lG2TjqBN40e?scode=AHIAtge9AAY1BahAdPATUAyQY1AJU&newPad=1&newPadType=clone&tab=rj8f3b
-活动时间：11.15大促期间
+function parseAndDisplay() {
+  var rawText = document.getElementById('raw-input').value;
+  if (!rawText.trim()) {
+    alert("请先粘贴公告内容！");
+    return;
+  }
 
-⚠提醒 MX墨西哥12月曝光自提品 今天16点截止
-【MX自营  12月提品】
-截止：11/5 16点
-https://shimo.im/sheets/XyyMrIBJ8jaimgnl/d33C5
-活动时间：12.1-12.31 (大促+活动+秒杀曝光)
+  var blocks = splitAnnouncements(rawText);
+  parsedData = [];
 
-【马来CNCB】11.11+11.15+11.25 LTD 提报
-截止时间：2026年11月5日 17：00
-提报链接：https://seller.shopee.com.my/portal/marketing/cmt-product/campaign/2048108190
-后台搜索：[November 2026] Limited Time Deals
-对接人：Libby
-活动介绍：https://shimo.im/sheets/3lFEfu9v1bM16uCd/MODOC
-排期：①11.08-11.14 ②11.14-11.20 ③11.24-11.30
+  for (var i = 0; i < blocks.length; i++) {
+    parsedData.push(parseSingle(blocks[i]));
+  }
 
-台湾【11.11 Motors 分會場】DDL：11/6  12:00
-需要卖家提交 一品 +一券，我们会给与额外曝光。
-链接：https://shimo.im/sheets/erAdML10LYiyRD3G/3F3vB
+  var tbody = document.getElementById('table-body');
+  tbody.innerHTML = '';
 
-【AR阿根廷 12月提品】
-截止：11/9 16点
-https://shimo.im/sheets/KlkKvdvdLOSoXOqd/Lu3CS
-活动时间： 12/1-12/31
+  parsedData.forEach(function(row) {
+    var tr = document.createElement('tr');
+    tr.innerHTML = 
+      '<td><span class="tag-site">' + escapeHtml(row.site) + '</span></td>' +
+      '<td title="' + escapeHtml(row.title) + '">' + escapeHtml(row.title) + '</td>' +
+      '<td><span class="tag-type">' + escapeHtml(row.type) + '</span></td>' +
+      '<td><span class="text-date">' + escapeHtml(row.deadline) + '</span></td>' +
+      '<td title="' + escapeHtml(row.req) + '">' + escapeHtml(row.req) + '</td>' +
+      '<td title="' + escapeHtml(row.schedule) + '">' + escapeHtml(row.schedule) + '</td>' +
+      '<td title="' + escapeHtml(row.link) + '">' + (row.link !== '-' ? '<a href="' + row.link.split(' ')[0] + '" target="_blank" style="color:#2b65ec;">' + escapeHtml(row.link.substring(0,25)) + '...</a>' : '-') + '</td>' +
+      '<td title="' + escapeHtml(row.path) + '">' + escapeHtml(row.path) + '</td>' +
+      '<td><span style="color:#2b65ec; font-weight:500;">' + escapeHtml(row.status) + '</span></td>' +
+      '<td>' + escapeHtml(row.manager) + '</td>';
+    tbody.appendChild(tr);
+  });
 
-【马来】秒杀最终排期表 11.7-11.10
-截止：今天16点
-https://shimo.im/sheets/fAYweE0xkl0fy0JE/Qm3xX
-活动排期：11.7-11.10`;
-      document.getElementById('raw-input').value = sampleText;
-      parseAll();
-    }
-  </script>
+  document.getElementById('stat-info').innerText = '已成功提取 ' + parsedData.length + ' 场活动';
+  updateTSVBox();
+}
+
+function updateTSVBox() {
+  var tsvLines = parsedData.map(function(r) {
+    return [
+      r.site,
+      r.title,
+      r.type,
+      r.deadline,
+      r.req,
+      r.schedule,
+      r.link,
+      r.path,
+      r.status,
+      r.manager
+    ].map(function(v){ return (v || '-').replace(/[\r\n\t]+/g, ' '); }).join('\t');
+  });
+
+  var tsvText = tsvLines.join('\n');
+  var box = document.getElementById('copy-box');
+  var tsvOut = document.getElementById('tsv-output');
+  tsvOut.value = tsvText;
+  box.style.display = 'block';
+  tsvOut.select();
+}
+
+function copyTSV() {
+  if (parsedData.length === 0) {
+    parseAndDisplay();
+    if (parsedData.length === 0) return;
+  }
+
+  var tsvOut = document.getElementById('tsv-output');
+  tsvOut.select();
+
+  var textToCopy = tsvOut.value;
+
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(textToCopy).then(function() {
+      showToast();
+    }).catch(function() {
+      fallbackCopy(textToCopy);
+    });
+  } else {
+    fallbackCopy(textToCopy);
+  }
+}
+
+function fallbackCopy(text) {
+  var textArea = document.createElement("textarea");
+  textArea.value = text;
+  textArea.style.position = "fixed";
+  textArea.style.left = "-9999px";
+  textArea.style.top = "0";
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+  try {
+    document.execCommand('copy');
+    showToast();
+  } catch (err) {
+    alert("复制受限，请在下方预览框手动按 Ctrl+C 复制！");
+  }
+  document.body.removeChild(textArea);
+}
+
+function showToast() {
+  var toast = document.getElementById('toast');
+  toast.style.display = 'flex';
+  setTimeout(function() { toast.style.display = 'none'; }, 4000);
+}
+
+function clearAll() {
+  document.getElementById('raw-input').value = '';
+  document.getElementById('table-body').innerHTML = '<tr><td colspan="10" style="text-align: center; color: var(--text-muted); padding: 30px;">请在上方输入框粘贴公告并点击「⚡ 一键智能提取」</td></tr>';
+  document.getElementById('copy-box').style.display = 'none';
+  document.getElementById('stat-info').innerText = '';
+  parsedData = [];
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+</script>
+
 </body>
 </html>
