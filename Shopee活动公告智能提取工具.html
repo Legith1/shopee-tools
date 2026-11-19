@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shopee 活动公告智能提取与表格转换工具 (飞书&企微完美对齐版)</title>
+  <style>
+    :root {
+      --primary: #635bff;
+      --primary-hover: #5148e6;
+      --primary-soft: #eeecff;
+      --accent: #18b6a4;
+      --bg-page: #f4f6fb;
+      --bg-card: rgba(255, 255, 255, 0.94);
+      --text-main: #172033;
+      --text-sub: #5d687d;
+      --text-muted: #8c96a8;
+      --border: #e4e8f0;
+      --border-light: #edf0f5;
+      --success-bg: #e8faf3;
+      --success-text: #087f68;
+      --success-border: #bdebdc;
+      --danger-bg: #fff1f2;
+      --danger-text: #d73a5a;
+      --danger-border: #ffcbd3;
+      --warning-bg: #fff7e8;
+      --warning-text: #b96c0b;
+      --shadow-sm: 0 8px 24px rgba(40, 52, 89, 0.06);
+      --shadow-md: 0 18px 50px rgba(40, 52, 89, 0.10);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background:
+        radial-gradient(circle at 8% -4%, rgba(99, 91, 255, 0.16), transparent 28%),
+        radial-gradient(circle at 100% 12%, rgba(24, 182, 164, 0.12), transparent 26%),
+        var(--bg-page);
+      color: var(--text-main);
+      padding: 28px 24px;
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 1480px;
+      margin: 0 auto;
+    }
+    .header {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, #1f2856 0%, #4038a9 58%, #635bff 100%);
+      color: #fff;
+      padding: 28px 32px;
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,.18);
+      box-shadow: var(--shadow-md);
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 18px;
+    }
+    .header::after {
+      content: "";
+      position: absolute;
+      width: 260px;
+      height: 260px;
+      right: -80px;
+      top: -120px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.13);
+    }
+    .title-area { position: relative; z-index: 1; }
+    .title-area h1 {
+      font-size: clamp(20px, 2.1vw, 30px);
+      letter-spacing: -.02em;
+      font-weight: 750;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .title-area p { color: rgba(255,255,255,.72) !important; font-size: 13px !important; }
+    .badge {
+      font-size: 11px;
+      background: rgba(255,255,255,.16);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,.28);
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .input-card, .result-section {
+      background: var(--bg-card);
+      border-radius: 18px;
+      border: 1px solid rgba(228,232,240,.9);
+      padding: 22px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow-sm);
+      backdrop-filter: blur(14px);
+    }
+    .input-card::before, .result-section::before, .todo-section::before {
+      content: "";
+      display: block;
+      width: 42px;
+      height: 4px;
+      border-radius: 99px;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      margin-bottom: 16px;
+    }
+    .textarea-box {
+      width: 100%;
+      min-height: 190px;
+      padding: 16px 18px;
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      font-size: 13px;
+      color: var(--text-main);
+      background: #fbfcff;
+      outline: none;
+      resize: vertical;
+      transition: border-color .2s, box-shadow .2s, background .2s;
+      line-height: 1.7;
+    }
+    .textarea-box::placeholder { color: #a1aabd; }
+    .textarea-box:focus {
+      border-color: var(--primary);
+      background: #fff;
+      box-shadow: 0 0 0 4px rgba(99,91,255,.12);
+    }
+    .action-bar {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .btn {
+      padding: 9px 15px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 650;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid transparent;
+      transition: transform .18s, box-shadow .18s, background .18s, border-color .18s;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), #8078ff);
+      color: #fff;
+      box-shadow: 0 8px 18px rgba(99,91,255,.22);
+    }
+    .btn-primary:hover { background: linear-gradient(135deg, var(--primary-hover), #7168f2); }
+    .btn-outline {
+      background: rgba(255,255,255,.9);
+      color: var(--text-sub);
+      border-color: var(--border);
+    }
+    .btn-outline:hover { background: var(--primary-soft); color: var(--primary); border-color: #cfcaff; }
+    .btn-success { background: var(--accent); color: #fff; box-shadow: 0 8px 18px rgba(24,182,164,.18); }
+    .btn-success:hover { background: #0f9f90; }
+    .result-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .result-header h2 { color: var(--text-main); letter-spacing: -.01em; }
+    .table-responsive {
+      overflow-x: auto;
+      border: 1px solid var(--border-light);
+      border-radius: 13px;
+      background: #fff;
+    }
+    table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 12px; text-align: left; }
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      background: #f7f8fc;
+      padding: 12px 13px;
+      font-weight: 700;
+      color: var(--text-sub);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    td { padding: 12px 13px; border-bottom: 1px solid var(--border-light); vertical-align: middle; color: var(--text-main); }
+    tbody tr:last-child td { border-bottom: 0; }
+    tbody tr:hover td { background: #f8f8ff; }
+    h2 { font-size: 16px; }
+    .site-tag {
+      display: inline-block;
+      padding: 4px 9px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .tag-my { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+    .tag-mx { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+    .tag-br { background: #dbeafe; color: #1d4ed8; border: 1px solid #bfdbfe; }
+    .tag-ph { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+    .tag-tw { background: #f3e8ff; color: #7e22ce; border: 1px solid #d8b4fe; }
+    .tag-sg { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+    .tag-th { background: #ffedd5; color: #c2410c; border: 1px solid #fed7aa; }
+    .tag-ar { background: #ecfccb; color: #4d7c0f; border: 1px solid #d9f99d; }
+    .tag-other { background: #f3f4f6; color: #4b5563; border: 1px solid #e5e7eb; }
+    
+    .type-tag, .status-chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 650;
+      background: var(--primary-soft);
+      color: #5148c7;
+      border: 1px solid #d9d5ff;
+      white-space: nowrap;
+    }
+    .status-chip { background: var(--warning-bg); color: var(--warning-text); border-color: #ffe0a6; }
+    .link-btn {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+    .link-btn:hover { text-decoration: underline; color: var(--primary-hover); }
+    .toast {
+      position: fixed;
+      top: 22px;
+      right: 22px;
+      background: #172033;
+      color: #fff;
+      padding: 12px 17px;
+      border-radius: 12px;
+      font-size: 13px;
+      display: none;
+      z-index: 999;
+      box-shadow: var(--shadow-md);
+      border: 1px solid rgba(255,255,255,.14);
+    }
+    .todo-section {
+      background: var(--bg-card);
+      border-radius: 18px;
+      border: 1px solid rgba(228,232,240,.9);
+      padding: 22px;
+      margin-top: 20px;
+      box-shadow: var(--shadow-md);
+      backdrop-filter: blur(14px);
+    }
+    .todo-toolbar {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .todo-toolbar select {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #fff;
+      color: var(--text-main);
+      padding: 9px 12px;
+      font-size: 13px;
+      outline: none;
+    }
+    .todo-toolbar select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99,91,255,.1); }
+    .todo-summary {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 9px;
+      margin-bottom: 14px;
+    }
+    .todo-stat {
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: linear-gradient(145deg, #fbfcff, #f3f5fb);
+      color: var(--text-sub);
+      font-size: 12px;
+      border: 1px solid var(--border-light);
+    }
+    .todo-stat strong { display: block; font-size: 20px; line-height: 1.1; margin-top: 4px; }
+    .todo-stat:nth-child(2) strong { color: var(--primary); }
+    .todo-stat:nth-child(3) strong { color: var(--success-text); }
+    .todo-stat:nth-child(4) strong { color: var(--danger-text); }
+    .todo-stat strong { color: var(--text-main); }
+    .todo-check {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+      accent-color: var(--success-text);
+    }
+    .todo-done td { color: var(--text-muted); text-decoration: line-through; background: #fafbfc; }
+    .todo-done .link-btn, .todo-done .status-chip { text-decoration: none; }
+    .deadline-overdue { color: var(--danger-text); font-weight: 700; }
+    .deadline-soon { color: var(--warning-text); font-weight: 700; }
+    .deadline-normal { color: var(--text-main); }
+    .todo-note { color: var(--text-muted); font-size: 11px; margin-top: 11px; line-height: 1.6; }
+    .btn-danger { background: var(--danger-bg); color: var(--danger-text); border-color: var(--danger-border); }
+    .btn-danger:hover { background: #ffe1e1; }
+
+    .todo-link-cell { min-width: 220px; max-width: 280px; }
+    .todo-link { display: inline-block; max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; }
+    /* 桌面端：扩大右侧待办区域，主内容与待办约 55:45；窄屏自动回到底部 */
+    @media (min-width: 1101px) {
+      body { padding-right: calc(45vw + 28px); }
+      .container { max-width: none; margin: 0; }
+      .todo-section {
+        position: fixed;
+        top: 18px;
+        right: 18px;
+        width: min(760px, calc(45vw - 28px));
+        min-width: 500px;
+        max-height: calc(100vh - 36px);
+        overflow: auto;
+        z-index: 20;
+        margin-top: 0;
+      }
+      .todo-section .table-responsive { overflow-x: auto; }
+      .todo-section table { min-width: 1120px; font-size: 11px; }
+      .todo-section th, .todo-section td { padding: 9px 9px; }
+      .todo-section th:nth-child(5), .todo-section td:nth-child(5) { min-width: 170px; }
+      .todo-section th:nth-child(6), .todo-section td:nth-child(6) { min-width: 110px; }
+      .todo-section th:nth-child(7), .todo-section td:nth-child(7) { min-width: 145px; }
+      .todo-section th:nth-child(8), .todo-section td:nth-child(8) { min-width: 220px; }
+      .todo-section th:nth-child(9), .todo-section td:nth-child(9) { min-width: 68px; }
+      .todo-section th:nth-child(10), .todo-section td:nth-child(10) { min-width: 140px; }
+    }
+    @media (max-width: 1100px) {
+      body { padding: 18px 14px; }
+      .todo-section { position: static; max-height: none; overflow: visible; }
+    }
+    @media (max-width: 680px) {
+      .header { padding: 22px 20px; border-radius: 18px; }
+      .input-card, .result-section, .todo-section { padding: 16px; border-radius: 15px; }
+      .todo-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .result-header { align-items: flex-start; flex-direction: column; }
+      .action-bar .btn { flex: 1 1 auto; justify-content: center; }
+    }
+  </style>
+  <style id="modern-ui-overrides">
+    /* Modern SaaS UI refresh: offline-safe, no external dependency */
+    :root {
+      --primary: #ee4d2d;
+      --primary-hover: #d83b1f;
+      --primary-soft: #fff1ed;
+      --blue: #2563eb;
+      --blue-soft: #eff6ff;
+      --bg-page: #f8fafc;
+      --bg-card: #ffffff;
+      --text-main: #172033;
+      --text-sub: #64748b;
+      --text-muted: #94a3b8;
+      --border: #e2e8f0;
+      --border-light: #eef2f7;
+      --success-bg: #ecfdf5;
+      --success-text: #047857;
+      --warning-bg: #fffbeb;
+      --warning-text: #a16207;
+      --danger-bg: #fff1f2;
+      --danger-text: #be123c;
+      --shadow-sm: 0 1px 3px rgba(15, 23, 42, .06), 0 1px 2px rgba(15, 23, 42, .04);
+      --shadow-md: 0 10px 30px rgba(15, 23, 42, .08);
+    }
+    html { background: var(--bg-page); }
+    body {
+      background: var(--bg-page) !important;
+      color: var(--text-main);
+      padding: 24px !important;
+      line-height: 1.5;
+    }
+    .container {
+      width: min(1440px, 100%);
+      max-width: none !important;
+      margin: 0 auto !important;
+      display: grid !important;
+      grid-template-columns: minmax(360px, 4fr) minmax(560px, 6fr);
+      grid-template-rows: auto auto 1fr;
+      gap: 18px 20px;
+      align-items: start;
+    }
+    .header {
+      grid-column: 1 / -1;
+      grid-row: 1;
+      position: static !important;
+      overflow: visible !important;
+      background: var(--bg-card) !important;
+      color: var(--text-main) !important;
+      padding: 20px 24px !important;
+      border: 1px solid var(--border) !important;
+      border-radius: 12px !important;
+      box-shadow: var(--shadow-sm) !important;
+      margin: 0 !important;
+      min-height: 82px;
+    }
+    .header::after { display: none !important; }
+    .title-area { position: static !important; }
+    .title-area h1 {
+      color: var(--text-main) !important;
+      font-size: 22px !important;
+      font-weight: 750 !important;
+      letter-spacing: -.02em;
+    }
+    .title-area p { color: var(--text-sub) !important; }
+    .badge {
+      background: var(--primary-soft) !important;
+      color: var(--primary) !important;
+      border: 1px solid #fed7cc !important;
+      padding: 3px 9px !important;
+      font-weight: 700 !important;
+    }
+    .input-card {
+      grid-column: 1;
+      grid-row: 2;
+      background: var(--bg-card) !important;
+      border: 1px solid var(--border) !important;
+      border-radius: 12px !important;
+      padding: 18px !important;
+      margin: 0 !important;
+      box-shadow: var(--shadow-sm) !important;
+    }
+    .result-section {
+      grid-column: 1;
+      grid-row: 3;
+      background: var(--bg-card) !important;
+      border: 1px solid var(--border) !important;
+      border-radius: 12px !important;
+      padding: 18px !important;
+      margin: 0 !important;
+      box-shadow: var(--shadow-sm) !important;
+      min-width: 0;
+    }
+    .todo-section {
+      grid-column: 2;
+      grid-row: 2 / span 2;
+      position: sticky !important;
+      top: 18px !important;
+      width: auto !important;
+      min-width: 0 !important;
+      max-height: calc(100vh - 42px) !important;
+      overflow: auto !important;
+      background: var(--bg-card) !important;
+      border: 1px solid var(--border) !important;
+      border-radius: 12px !important;
+      padding: 18px !important;
+      margin: 0 !important;
+      box-shadow: var(--shadow-sm) !important;
+    }
+    .input-card::before, .result-section::before, .todo-section::before { display: none !important; }
+    .textarea-box {
+      min-height: 160px !important;
+      height: 160px !important;
+      padding: 13px 14px !important;
+      border: 1px solid var(--border) !important;
+      border-radius: 8px !important;
+      background: #fff !important;
+      font-size: 13px !important;
+      line-height: 1.65 !important;
+    }
+    .textarea-box:focus {
+      border-color: var(--blue) !important;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, .12) !important;
+    }
+    .action-bar { margin-top: 12px !important; gap: 8px !important; }
+    .btn {
+      padding: 8px 13px !important;
+      min-height: 36px;
+      border-radius: 8px !important;
+      font-size: 12px !important;
+      font-weight: 650 !important;
+      box-shadow: none !important;
+      transform: none !important;
+    }
+    .btn:hover { transform: translateY(-1px) !important; }
+    .btn-primary { background: var(--primary) !important; }
+    .btn-primary:hover { background: var(--primary-hover) !important; }
+    .btn-outline {
+      background: #fff !important;
+      border-color: var(--border) !important;
+      color: var(--text-sub) !important;
+    }
+    .btn-outline:hover { background: #f8fafc !important; color: var(--text-main) !important; border-color: #cbd5e1 !important; }
+    .btn-danger { background: var(--danger-bg) !important; color: var(--danger-text) !important; border-color: #fecdd3 !important; }
+    .result-header { margin-bottom: 12px !important; }
+    .result-header h2 { color: var(--text-main) !important; font-size: 15px !important; }
+    .result-header > span { color: var(--text-muted) !important; }
+    .table-responsive {
+      border-color: var(--border) !important;
+      border-radius: 9px !important;
+      background: #fff !important;
+    }
+    table { font-size: 12px !important; }
+    th {
+      position: sticky !important;
+      top: 0;
+      z-index: 2;
+      background: #f8fafc !important;
+      color: #475569 !important;
+      padding: 10px 11px !important;
+      border-bottom: 1px solid var(--border) !important;
+      font-weight: 700 !important;
+    }
+    td { padding: 10px 11px !important; border-bottom-color: var(--border-light) !important; }
+    tbody tr:hover td { background: #fffaf8 !important; }
+    .site-tag, .type-tag, .status-chip { border-radius: 6px !important; font-weight: 700 !important; }
+    .type-tag { background: var(--blue-soft) !important; color: #1d4ed8 !important; border-color: #bfdbfe !important; }
+    .status-chip { background: var(--warning-bg) !important; color: var(--warning-text) !important; border-color: #fde68a !important; }
+    .todo-summary {
+      grid-template-columns: repeat(4, minmax(88px, 1fr)) !important;
+      gap: 8px !important;
+      margin-bottom: 12px !important;
+    }
+    .todo-stat {
+      background: #fff !important;
+      border: 1px solid var(--border) !important;
+      border-radius: 9px !important;
+      padding: 9px 10px !important;
+      color: var(--text-sub) !important;
+      box-shadow: none !important;
+    }
+    .todo-stat strong { display: block; color: var(--text-main) !important; font-size: 19px !important; margin-top: 2px; }
+    .todo-stat:nth-child(2) strong { color: var(--primary) !important; }
+    .todo-stat:nth-child(3) strong { color: var(--success-text) !important; }
+    .todo-stat:nth-child(4) strong { color: var(--danger-text) !important; }
+    .todo-toolbar { margin-bottom: 12px !important; }
+    .todo-toolbar select { border-radius: 8px !important; padding: 8px 10px !important; }
+    .todo-section .table-responsive { overflow-x: auto !important; }
+    .todo-section table { min-width: 920px !important; table-layout: fixed; }
+    .todo-section th, .todo-section td { padding: 9px 8px !important; }
+    .todo-section th:nth-child(1), .todo-section td:nth-child(1) { width: 48px; text-align: center; }
+    .todo-section th:nth-child(2), .todo-section td:nth-child(2) { width: 132px; }
+    .todo-section th:nth-child(3), .todo-section td:nth-child(3) { width: 92px; }
+    .todo-section th:nth-child(4), .todo-section td:nth-child(4) { width: 72px; }
+    .todo-section th:nth-child(5), .todo-section td:nth-child(5) { width: 190px; }
+    .todo-section th:nth-child(6), .todo-section td:nth-child(6) { width: 100px; }
+    .todo-section th:nth-child(7), .todo-section td:nth-child(7) { width: 150px; }
+    .todo-section th:nth-child(8), .todo-section td:nth-child(8) { width: 116px; }
+    .todo-section th:nth-child(9), .todo-section td:nth-child(9) { width: 68px; text-align: center; }
+    .todo-section th:nth-child(10), .todo-section td:nth-child(10) { width: 135px; }
+    .todo-section th:nth-child(11), .todo-section td:nth-child(11) { width: 58px; }
+    .todo-name-cell, .todo-schedule-cell, .todo-link-cell { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .todo-name-cell { max-width: 190px; }
+    .todo-schedule-cell { max-width: 150px; }
+    .todo-link-cell { max-width: 116px; }
+    .todo-link { display: inline-block; max-width: 104px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; }
+    .todo-link:hover { text-decoration: none !important; color: var(--primary-hover); }
+    .todo-note { color: var(--text-muted) !important; }
+    .empty-state { text-align: center; padding: 44px 16px; color: var(--text-muted); }
+    .empty-state-icon { width: 58px; height: 58px; margin: 0 auto 12px; border-radius: 16px; display: grid; place-items: center; background: #f1f5f9; color: #94a3b8; font-size: 26px; }
+    .empty-state-title { color: var(--text-sub); font-weight: 750; margin-bottom: 5px; font-size: 14px; }
+    .empty-state-copy { font-size: 12px; color: var(--text-muted); }
+    .todo-check { accent-color: var(--primary) !important; }
+    .todo-done td { background: #fcfcfd !important; }
+    .toast { background: #172033 !important; border-radius: 9px !important; }
+    @media (max-width: 1100px) {
+      body { padding: 16px !important; }
+      .container { display: flex !important; flex-direction: column !important; gap: 16px !important; }
+      .header, .input-card, .result-section, .todo-section { width: 100% !important; }
+      .header { order: 1; }
+      .input-card { order: 2; }
+      .result-section { order: 3; }
+      .todo-section { order: 4; position: static !important; max-height: none !important; }
+    }
+    @media (max-width: 680px) {
+      .header { padding: 18px !important; }
+      .title-area h1 { font-size: 19px !important; align-items: flex-start; flex-direction: column; gap: 6px; }
+      .input-card, .result-section, .todo-section { padding: 15px !important; }
+      .todo-summary { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+      .result-header { align-items: flex-start !important; flex-direction: column !important; }
+      .action-bar .btn { flex: 1 1 auto; justify-content: center; }
+    }
+<body>
+  <div id="toast" class="toast">✓ 活动已保存到待办清单</div>
+  <div class="container">
+    <div class="header">
+      <div class="title-area">
+        <h1>📊 Shopee 活动公告识别与待办工具 <span class="badge">本地自动保存</span></h1>
+        <p style="font-size:12px; color:var(--text-muted); margin-top:4px;">
+          粘贴公告后自动提取活动，并在右侧按截止时间维护每日待办清单
+        </p>
+      </div>
+      <div>
+        <button class="btn btn-outline" onclick="loadYesterdaySamples()">📥 载入昨日实战公告</button>
+      </div>
+    </div>
+
+    <div class="input-card">
+      <textarea id="raw-input" class="textarea-box" placeholder="请在此粘贴任意群公告文本（支持单条、多条、机器人提醒消息混合粘贴）..."></textarea>
+      <div class="action-bar">
+        <button class="btn btn-primary" onclick="parseAll()">⚡ 提取并保存到待办</button>
+        <button class="btn btn-outline" onclick="clearInput()">🧹 清空内容</button>
+      </div>
+    </div>
+
+    <div class="result-section">
+      <div class="result-header">
+        <h2 style="font-size:14px; font-weight:600;">本次解析结果 (<span id="count-span">0</span> 条活动)</h2>
+        <span style="font-size:12px; color:var(--text-muted);">解析后会自动合并到右侧待办清单</span>
+      </div>
+      <div class="table-responsive">
+        <table id="result-table">
+          <thead>
+            <tr>
+              <th>序号</th>
+              <th>1. 站点</th>
+              <th>2. 活动全称</th>
+              <th>3. 活动类型</th>
+              <th>4. 提报截止时间</th>
+              <th>5. 价格与准入要求</th>
+              <th>6. 活动排期 / 批次</th>
+              <th>7. 报名/名单链接</th>
+              <th>8. 后台搜索路径</th>
+              <th>9. 提报状态</th>
+              <th>10. 活动对接人</th>
+            </tr>
+          </thead>
+          <tbody id="table-body">
+            <tr>
+              <td colspan="11"><div class="empty-state"><div class="empty-state-icon">↗</div><div class="empty-state-title">等待解析公告</div><div class="empty-state-copy">在左侧输入框粘贴公告，解析结果会显示在这里</div></div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="todo-section">
+      <div class="result-header">
+        <h2 style="font-size:14px; font-weight:600;">📌 每日活动待办 (<span id="todo-count-span">0</span> 条)</h2>
+        <span style="font-size:12px; color:var(--text-muted);">打开页面即可查看</span>
+      </div>
+      <div class="todo-summary" id="todo-summary"></div>
+      <div class="todo-toolbar">
+        <select id="todo-filter" onchange="renderTodoList()">
+          <option value="all">全部</option>
+          <option value="pending">待提报</option>
+          <option value="done">已完成</option>
+          <option value="overdue">已逾期</option>
+        </select>
+        <button class="btn btn-danger" onclick="clearCompletedTodos()">清空已完成</button>
+      </div>
+      <div class="table-responsive">
+        <table id="todo-table">
+          <thead>
+            <tr>
+              <th>完成</th>
+              <th>截止时间</th>
+              <th>状态</th>
+              <th>站点</th>
+              <th>活动名称</th>
+              <th>活动类型</th>
+              <th>活动排期</th>
+              <th>链接</th>
+              <th>提取次数</th>
+              <th>最近提取</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="todo-body">
+            <tr><td colspan="11"><div class="empty-state"><div class="empty-state-icon">✓</div><div class="empty-state-title">还没有活动待办</div><div class="empty-state-copy">粘贴公告并点击“提取并保存到待办”，活动会自动出现在这里</div></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="todo-note">数据保存在当前浏览器的 localStorage 中。每天把新公告粘贴后点击“提取并保存到待办”，历史记录会自动保留。</div>
+    </div>
+  </div>
+ 
+  <script>
+    var parsedList = [];
+    var todoList = [];
+    var TODO_STORAGE_KEY = 'shopee_activity_todo_v1';
+
+
+    function showToast(msg) {
+      var t = document.getElementById('toast');
+      t.innerText = msg;
+      t.style.display = 'block';
+      setTimeout(function(){ t.style.display = 'none'; }, 3500);
+    }
+
+    function clearInput() {
+      document.getElementById('raw-input').value = '';
+      parsedList = [];
+      renderTable();
+      loadTodoList();
+    }
+
+    function splitAnnouncements(rawText) {
+      var text = rawText.replace(/\\_/g, '_');
+      var chunks = [];
+      if (text.indexOf('","') !== -1 || text.indexOf('", "') !== -1) {
+        chunks = text.split(/"\s*,\s*"/);
+      } else {
+        var blocks = text.split(/(?=\n?【(?:菲律宾|马来|墨西哥|印尼|台湾|阿根廷|新加坡|巴西|泰国|越南|PH|MY|MX|ID|TW|BR|TH|SG|AR)[^】\n]*】全品类卖家活动公告|\[🤖活动智能提醒助手\]|📢【|⚠提醒\s+[A-Z]{2}|台湾【11\.11|🔥\s*大促流量高峰|【FBS\s+Pene%\s+Program】)/g);
+        if (blocks.length > 1) {
+          chunks = blocks;
+        } else {
+          chunks = [text];
+        }
+      }
+
+      var results = [];
+      chunks.forEach(function(chunk) {
+        var c = chunk.replace(/^["“”\s]+|["“”\s]+$/g, '').trim();
+        if (c) results.push(c);
+      });
+      return results;
+    }
+
+    function getSiteTagClass(site) {
+      if (/马|MY/i.test(site)) return 'tag-my';
+      if (/墨|MX/i.test(site)) return 'tag-mx';
+      if (/巴|BR/i.test(site)) return 'tag-br';
+      if (/菲|PH/i.test(site)) return 'tag-ph';
+      if (/台|TW/i.test(site)) return 'tag-tw';
+      if (/新|SG/i.test(site)) return 'tag-sg';
+      if (/泰|TH/i.test(site)) return 'tag-th';
+      if (/阿|AR/i.test(site)) return 'tag-ar';
+      return 'tag-other';
+    }
+
+    function deduceType(text, title) {
+      if (/FBS|Program|激励|增长|返点|广告/i.test(text + title)) return '增长激励';
+      if (/议价|选品池/i.test(text + title)) return '月度议价';
+      if (/免费试用|MDV/i.test(text + title)) return '免费试用';
+      if (/秒杀/i.test(text + title)) return '秒杀大促';
+      if (/LTD|大促|A\+|11\.11|12\.12/i.test(text + title)) return 'A+大促LTD';
+      if (/素材|广播|装修/i.test(text + title)) return '素材运营';
+      if (/上限|规则|配送/i.test(text + title)) return '规则升级';
+      if (/提品|自提/i.test(text + title)) return '新品提品';
+      if (/会场|分會場/i.test(text + title)) return '类目会场';
+      return '常规活动';
+    }
+
+    function parseSingle(text) {
+      // 1. Site Detection
+      var site = "官方/多站点";
+      var siteMatch = text.match(/【(BR巴西|MX墨西哥|PH菲律宾|AR阿根廷|马来|墨西哥|印尼|菲律宾|台湾|新加坡|巴西|泰国|越南|马来CNCB|PH|MY|MX|ID|TW|BR|TH|SG|AR)[^】]*】/) ||
+                        text.match(/(?:提醒|搜|搜:|搜：)\s*([A-Z]{2}|巴西|墨西哥|马来|印尼|菲律宾|台湾|新加坡|泰国|阿根廷)/i) ||
+                        text.match(/(BR巴西|MX墨西哥|PH|MY|MX|ID|TW|BR|TH|SG|AR|巴西|墨西哥|马来|印尼|菲律宾|台湾|新加坡|泰国|阿根廷)/i);
+      if (siteMatch) {
+        site = siteMatch[1].replace(/CNCB|全品类卖家活动公告/g, '').trim();
+      }
+
+      // 2. Title
+      var title = "";
+      var titleMatch = text.match(/【([^】\n]*(?:LTD|提报|议价|秒杀|试用|大促|特卖|选品|自营|Program|价格上限|素材分享|活动|会场|激励)[^】\n]*)】/) ||
+                         text.match(/📢?【([^】\n]+)】/) ||
+                         text.match(/(?:🔥|📢)?\s*([^\n]+(?:大促|激励|提品|议价|排期|选品|提报)[^\n]*)/);
+      if (titleMatch) {
+        title = titleMatch[1].trim();
+      } else {
+        var lines = text.split('\n').filter(function(l){ return l.trim().length > 0; });
+        title = (lines[0] || "活动公告").substring(0, 45);
+      }
+      title = title.replace(/^重要提醒[！!]?\s*/, '').replace(/全品类卖家活动公告.*$/, '').trim();
+      if (!title) title = "活动提报汇总";
+
+      // 3. Campaign Type
+      var type = deduceType(text, title);
+
+      // 4. Deadline
+      var deadline = "详见通知";
+      var deadMatch = text.match(/(?:距提报截止时间（|截止时间[：:]|⏰截止[：:]?|⏰反馈截止[：:]?|截止[：:]|DDL[：:]|免费试用退出截止时间[：:]|今天下午|今天)([\s\d\/\-年\.\:：点!！]+(?:[0-9]{1,2}:[0-9]{1,2}|[0-9]{1,2}点)?)/i);
+      if (deadMatch) {
+        deadline = deadMatch[1].replace(/[!！\(\)（）]/g, '').trim();
+        if (text.indexOf('今天下午4点') !== -1 || text.indexOf('今天下午 4 点') !== -1) deadline = "当天 16:00";
+        if (text.indexOf('今天16点') !== -1) deadline = "当天 16:00";
+      }
+
+      // 5. Requirements
+      var reqList = [];
+      var reqMatch = text.match(/(?:✅要求|提报要求|注意事项|要求|条件|报价需满足|参与方式)[：:]?\s*([\s\S]*?)(?=(?:提报说明|如有疑问|有问题|相关文章|发送人|截止|入口|Task|━━━━━━━━|\n\n|$))/);
+      if (reqMatch) {
+        var cleanReq = reqMatch[1].replace(/^[0-9\.\s、\-\*]+/mg, '').replace(/\n+/g, '； ').trim();
+        if (cleanReq.length > 120) cleanReq = cleanReq.substring(0, 120) + '...';
+        reqList.push(cleanReq);
+      }
+      var reqStr = reqList.length > 0 ? reqList[0] : "-";
+      if (text.indexOf('9月最低价') !== -1) reqStr = "9月最低价（税前）" + (reqStr !== "-" ? "； " + reqStr : "");
+      if (text.indexOf('Penalty point') !== -1) reqStr = "店铺罚分<=2，状态正常" + (reqStr !== "-" ? "； " + reqStr : "");
+
+      // 6. Schedule
+      var schedule = "-";
+      var schedMatch = text.match(/(?:活动时间|活动周期|免费试用期|排期)[：:]?\s*([^\n]+)/) ||
+                         text.match(/([0-9]{1,2}\.[0-9]{1,2}\s*[-~至]\s*[0-9]{1,2}\.[0-9]{1,2}[^\n]*)/);
+      if (schedMatch) {
+        schedule = schedMatch[1].trim();
+      }
+      var subBatches = text.match(/[①②③④⑤\d\.]+\s*[^①②③④⑤\n]+/g);
+      if (subBatches && subBatches.length > 1) {
+        schedule = subBatches.map(function(s){ return s.trim(); }).join(" | ");
+      }
+
+      // 7. Links
+      var regLinks = [];
+      var urls = text.match(/https?:\/\/[^\s\u4e00-\u9fa5\)）\]]+/g);
+      if (urls && urls.length > 0) {
+        for (var i = 0; i < urls.length; i++) {
+          var u = urls[i].replace(/[!！,\.。]+$/, '');
+          if (regLinks.indexOf(u) === -1) regLinks.push(u);
+        }
+      }
+      var linkDisplay = regLinks.length > 0 ? regLinks.join("\n") : "-";
+
+      // 8. Search Path
+      var path = "-";
+      var pathMatch = text.match(/(?:报名途径|提报渠道|入口|提报路径)[：:]?\s*([^\n]+)/) ||
+                        text.match(/(?:卖家中心|卖家后台|中国卖家中心)[^>\n]*>[^\n]+/);
+      if (pathMatch) {
+        path = pathMatch[1] ? pathMatch[1].trim() : pathMatch[0].trim();
+      }
+
+      // 9. Status
+      var status = "待提报";
+      if (text.indexOf('已完成') !== -1 || text.indexOf('素材分享') !== -1 || text.indexOf('价格上限提升') !== -1) {
+        status = "已完成";
+      }
+
+      // 10. Manager
+      var manager = "-";
+      var mgrMatch = text.match(/(?:发送人[：:]|咨询活动经理|活动经理|对接人|咨询|联系)[：:]?\s*([a-zA-Z\u4e00-\u9fa5\/]+)/);
+      if (mgrMatch) {
+        manager = mgrMatch[1].trim();
+      }
+
+      return {
+        site: site,
+        title: title,
+        type: type,
+        deadline: deadline,
+        req: reqStr,
+        schedule: schedule,
+        link: linkDisplay,
+        path: path,
+        status: status,
+        manager: manager
+      };
+    }
+
+    function escapeHtml(value) {
+      return String(value == null ? '' : value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/\"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function getTodoKey(item) {
+      return [item.site, item.title, item.schedule, item.link].join('|').toLowerCase();
+    }
+
+    function parseDeadline(value) {
+      var text = String(value || '').trim();
+      if (!text || text === '详见通知' || text === '-') return null;
+      var match = text.match(/(20\d{2})[\/.年-](\d{1,2})[\/.月-](\d{1,2})(?:日)?(?:\s+|T)?(\d{1,2})?(?::(\d{1,2}))?/);
+      if (match) {
+        return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]), Number(match[4] || 23), Number(match[5] || 59), 59);
+      }
+      match = text.match(/(\d{1,2})[\/.月-](\d{1,2})(?:日)?(?:\s+|T)?(\d{1,2})?(?::(\d{1,2}))?/);
+      if (match) {
+        var now = new Date();
+        return new Date(now.getFullYear(), Number(match[1]) - 1, Number(match[2]), Number(match[3] || 23), Number(match[4] || 59), 59);
+      }
+      if (/当天|今天/.test(text)) {
+        var today = new Date();
+        var hour = text.match(/(\d{1,2})\s*点/);
+        var clock = text.match(/(\d{1,2})\s*[:：]\s*(\d{1,2})/);
+        var h = hour ? Number(hour[1]) : (clock ? Number(clock[1]) : 23);
+        var m = hour ? 0 : (clock ? Number(clock[2]) : 59);
+        today.setHours(h, m, 59, 0);
+        return today;
+      }
+      return null;
+    }
+
+    function getTodoDueState(item) {
+      if (item.completed) return { label: '已完成', css: 'deadline-normal' };
+      var due = parseDeadline(item.deadline);
+      if (!due) return { label: '待确认截止时间', css: 'deadline-normal' };
+      var now = new Date();
+      var diff = due.getTime() - now.getTime();
+      if (diff < 0) return { label: '已逾期', css: 'deadline-overdue' };
+      if (diff <= 48 * 60 * 60 * 1000) return { label: '即将截止', css: 'deadline-soon' };
+      return { label: '待提报', css: 'deadline-normal' };
+    }
+
+    function formatTodoDate(value) {
+      var due = parseDeadline(value);
+      if (!due) return value || '详见通知';
+      var pad = function(n){ return String(n).padStart(2, '0'); };
+      return due.getFullYear() + '-' + pad(due.getMonth() + 1) + '-' + pad(due.getDate()) + ' ' + pad(due.getHours()) + ':' + pad(due.getMinutes());
+    }
+
+    function saveTodoList() {
+      try { localStorage.setItem(TODO_STORAGE_KEY, JSON.stringify(todoList)); }
+      catch (e) { showToast('当前浏览器无法保存待办数据'); }
+    }
+
+    function loadTodoList() {
+      try {
+        var saved = JSON.parse(localStorage.getItem(TODO_STORAGE_KEY) || '[]');
+        todoList = Array.isArray(saved) ? saved : [];
+      } catch (e) { todoList = []; }
+      renderTodoList();
+    }
+
+    function mergeParsedIntoTodos() {
+      var now = new Date().toLocaleString('zh-CN', { hour12: false });
+      parsedList.forEach(function(item) {
+        var key = getTodoKey(item);
+        var old = todoList.filter(function(todo){ return todo.key === key; })[0];
+        if (old) {
+          var completed = old.completed === true;
+          Object.keys(item).forEach(function(k){ old[k] = item[k]; });
+          old.key = key;
+          old.completed = completed;
+          old.extractCount = (old.extractCount || 1) + 1;
+          old.lastExtractedAt = now;
+        } else {
+          todoList.push({
+            key: key,
+            site: item.site,
+            title: item.title,
+            type: item.type,
+            deadline: item.deadline,
+            req: item.req,
+            schedule: item.schedule,
+            link: item.link,
+            path: item.path,
+            manager: item.manager,
+            completed: item.status === '已完成',
+            extractCount: 1,
+            lastExtractedAt: now
+          });
+        }
+      });
+      saveTodoList();
+      renderTodoList();
+    }
+
+    function toggleTodo(key) {
+      todoList.forEach(function(item){ if (item.key === key) item.completed = !item.completed; });
+      saveTodoList();
+      renderTodoList();
+    }
+
+    function removeTodo(key) {
+      todoList = todoList.filter(function(item){ return item.key !== key; });
+      saveTodoList();
+      renderTodoList();
+    }
+
+    function clearCompletedTodos() {
+      if (!todoList.some(function(item){ return item.completed; })) {
+        showToast('暂无已完成活动');
+        return;
+      }
+      if (!confirm('确定清空所有已完成活动吗？')) return;
+      todoList = todoList.filter(function(item){ return !item.completed; });
+      saveTodoList();
+      renderTodoList();
+    }
+
+    function renderTodoList() {
+      var body = document.getElementById('todo-body');
+      var filter = document.getElementById('todo-filter').value;
+      var sorted = todoList.slice().sort(function(a, b) {
+        var da = parseDeadline(a.deadline); var db = parseDeadline(b.deadline);
+        var ta = da ? da.getTime() : Infinity; var tb = db ? db.getTime() : Infinity;
+        if (ta !== tb) return ta - tb;
+        return String(a.title).localeCompare(String(b.title), 'zh-CN');
+      });
+      var visible = sorted.filter(function(item){
+        var state = getTodoDueState(item).label;
+        if (filter === 'pending') return !item.completed && state !== '已逾期';
+        if (filter === 'done') return item.completed;
+        if (filter === 'overdue') return !item.completed && state === '已逾期';
+        return true;
+      });
+      document.getElementById('todo-count-span').innerText = todoList.length;
+      var pending = todoList.filter(function(x){ return !x.completed; }).length;
+      var done = todoList.filter(function(x){ return x.completed; }).length;
+      var overdue = todoList.filter(function(x){ return !x.completed && getTodoDueState(x).label === '已逾期'; }).length;
+      document.getElementById('todo-summary').innerHTML =
+        '<span class="todo-stat">全部 <strong>' + todoList.length + '</strong></span>' +
+        '<span class="todo-stat">待提报 <strong>' + pending + '</strong></span>' +
+        '<span class="todo-stat">已完成 <strong>' + done + '</strong></span>' +
+        '<span class="todo-stat">已逾期 <strong>' + overdue + '</strong></span>';
+      if (!visible.length) {
+        body.innerHTML = '<tr><td colspan="11"><div class="empty-state"><div class="empty-state-icon">⌁</div><div class="empty-state-title">当前筛选下暂无活动</div><div class="empty-state-copy">调整筛选条件，或粘贴新的活动公告开始整理</div></div></td></tr>';
+        return;
+      }
+      body.innerHTML = visible.map(function(item, idx) {
+        var state = getTodoDueState(item);
+        var links = item.link && item.link !== '-' ? item.link.split('\n').map(function(link){
+          return '<a href="' + escapeHtml(link) + '" target="_blank" rel="noopener" class="link-btn todo-link" title="' + escapeHtml(link) + '">🔗 查看提报链接</a>';
+        }).join(' ') : '-';
+        var rowClass = item.completed ? ' class="todo-done"' : '';
+        return '<tr' + rowClass + '>' +
+          '<td><input class="todo-check" type="checkbox" ' + (item.completed ? 'checked' : '') + ' onchange="toggleTodo(' + JSON.stringify(item.key).replace(/</g, '\\u003c') + ')"></td>' +
+          '<td class="' + state.css + '" title="原始截止时间：' + escapeHtml(item.deadline) + '">' + escapeHtml(formatTodoDate(item.deadline)) + '</td>' +
+          '<td><span class="status-chip">' + escapeHtml(state.label) + '</span></td>' +
+          '<td><span class="site-tag ' + getSiteTagClass(item.site) + '">' + escapeHtml(item.site) + '</span></td>' +
+          '<td class="todo-name-cell" title="' + escapeHtml(item.title) + '">' + escapeHtml(item.title) + '</td>' +
+          '<td><span class="type-tag">' + escapeHtml(item.type || '常规活动') + '</span></td>' +
+          '<td class="todo-schedule-cell" title="' + escapeHtml(item.schedule || '-') + '">' + escapeHtml(item.schedule || '-') + '</td>' +
+          '<td class="todo-link-cell">' + links + '</td>' +
+          '<td style="text-align:center;">' + Number(item.extractCount || 1) + '</td>' +
+          '<td style="white-space:nowrap;font-size:11px;">' + escapeHtml(item.lastExtractedAt || '-') + '</td>' +
+          '<td><button class="btn btn-outline" style="padding:4px 8px;font-size:11px;" onclick="removeTodo(' + JSON.stringify(item.key).replace(/</g, '\\u003c') + ')">删除</button></td>' +
+          '</tr>';
+      }).join('');
+    }
+
+    function parseAll() {
+      var raw = document.getElementById('raw-input').value.trim();
+      if (!raw) {
+        alert('请先粘贴公告文本！');
+        return;
+      }
+      var chunks = splitAnnouncements(raw);
+      parsedList = [];
+      chunks.forEach(function(chunk) {
+        if (chunk.length > 15) parsedList.push(parseSingle(chunk));
+      });
+      mergeParsedIntoTodos();
+      renderTable();
+      showToast('已识别 ' + parsedList.length + ' 条活动，并保存到右侧待办清单');
+    }
+
+    function renderTable() {
+      var tbody = document.getElementById('table-body');
+      document.getElementById('count-span').innerText = parsedList.length;
+      if (parsedList.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="11"><div class="empty-state"><div class="empty-state-icon">↗</div><div class="empty-state-title">等待解析公告</div><div class="empty-state-copy">在左侧输入框粘贴公告，解析结果会显示在这里</div></div></td></tr>';
+        return;
+      }
+      var html = '';
+      parsedList.forEach(function(item, idx) {
+        var siteTag = '<span class="site-tag ' + getSiteTagClass(item.site) + '">' + item.site + '</span>';
+        var typeTag = '<span class="type-tag">' + item.type + '</span>';
+        var linksHtml = item.link === '-' ? '-' : item.link.split('\n').map(function(l){
+          return '<a href="' + l + '" target="_blank" class="link-btn">🔗 查看链接</a>';
+        }).join('<br>');
+
+        html += '<tr>' +
+          '<td>' + (idx + 1) + '</td>' +
+          '<td>' + siteTag + '</td>' +
+          '<td style="font-weight:600; max-width:200px;">' + item.title + '</td>' +
+          '<td>' + typeTag + '</td>' +
+          '<td style="color:var(--danger-text); font-weight:500; white-space:nowrap;">' + item.deadline + '</td>' +
+          '<td style="max-width:180px; font-size:11px; color:var(--text-sub);">' + item.req + '</td>' +
+          '<td style="max-width:160px; font-size:11px;">' + item.schedule + '</td>' +
+          '<td>' + linksHtml + '</td>' +
+          '<td style="font-size:11px; max-width:140px;">' + item.path + '</td>' +
+          '<td><span class="status-chip">' + item.status + '</span></td>' +
+          '<td>' + item.manager + '</td>' +
+        '</tr>';
+      });
+      tbody.innerHTML = html;
+    }
+
+    function loadYesterdaySamples() {
+      var sampleText = `【FBS Pene% Program】 10月达成预测：
+🎉恭喜您入选2026官方海外仓高潜卖家增长项目。
+🎉请查看10月整月的达成情况，G列为预测激励，实际激励以后续正式通知为准：https://shimo.im/sheets/gXqmd6OBwWHYpg3o/eNMoh#viewport_eNMoh_EUGQsYmfh0lJ35wC
+🎉项目介绍：https://shimo.im/sheets/gXqmd6OBwWHYpg3o/BOD3W
+
+[🤖活动智能提醒助手] 威海诺亚国际贸易有限公司 - GGP您好，您还有以下活动未提报：
+距提报截止时间（2026-11-09 12:00）还剩3天18小时46分钟
+【BR巴西】【  2026年12月 月度议价】
+⏰反馈截止：11/9 12点
+提报渠道：卖家中心> 营销中心 > 跨境活动报名> 搜BR>勾全部店铺
+
+📢【PH Instant Delivery 可售商品价格上限提升至₱200,000】
+活动福利：自11月3日起，Instant Delivery可激活商品单价上限提升至₱200,000
+PH Instant Delivery功能介绍：https://shopee.cn/edu/article/27579
+
+【菲律宾】全品类卖家活动公告 11/4 11:21:42
+【PH MDV免费试用 -11.3-11.9 Batch】
+卖家名单：https://doc.weixin.qq.com/sheet/e3_ATUAyQY1AJUCNcB8xTOn6QCyw1Vt1?scode=AHIAtge9AAY6xmdBsvATUAyQY1AJU&tab=2dazil
+免费试用期：11月3日 00:00 - 11月9日 23:59
+免费试用退出截止时间：11月9日 17:00
+
+【菲律宾】全品类卖家活动公告 11/5 10:20:56
+【PH产品提报】12月上半月秒杀池议价&自主提报（含12.12年终大促）
+[卖家名单请点击]https://doc.weixin.qq.com/sheet/e3_ATUAyQY1AJUCNRzuzyx04RCSJ4Vfw?scode=AHIAtge9AAYjv8jTaaATUAyQY1AJU&tab=6vi69t
+活动周期：2026.12.01 - 2026.12.15
+❗❗提报截止时间：11/12 15:00 ❗❗
+提报渠道：跨境活动报名｜Task ID 16106 16107 16108 16109
+
+⚠提醒 MX墨西哥12月曝光自提品 今天16点截止
+【MX自营  12月提品】
+截止：11/5 16点
+https://shimo.im/sheets/XyyMrIBJ8jaimgnl/d33C5
+活动时间：12.1-12.31 (大促+活动+秒杀曝光)
+
+台湾【11.11 Motors 分會場】DDL：11/6  12:00
+需要卖家提交 一品 +一券，我们会给与额外曝光。
+链接：https://shimo.im/sheets/erAdML10LYiyRD3G/3F3vB
+
+【AR阿根廷 12月提品】
+截止：11/9 16点
+https://shimo.im/sheets/KlkKvdvdLOSoXOqd/Lu3CS
+活动时间： 12/1-12/31
+
+【新加坡】11月秒杀排期（更新至11/4）
+https://doc.weixin.qq.com/sheet/e3_AT4A3gbvAHECNiKBAwJssSAu3GJcF?scode=AHIAtge9AAYLbLLM3FAT4A3gbvAHE&tab=kz4rp9`;
+      document.getElementById('raw-input').value = sampleText;
+      parseAll();
+    }
+
+    function bootTodoApp() {
+      try {
+        loadTodoList();
+      } catch (error) {
+        console.error('待办初始化失败', error);
+        var fallback = document.getElementById('todo-body');
+        if (fallback) {
+          fallback.innerHTML = '<tr><td colspan="11"><div class="empty-state"><div class="empty-state-icon">!</div><div class="empty-state-title">待办暂时无法加载</div><div class="empty-state-copy">请刷新页面后重试；原始公告解析功能仍可使用</div></div></td></tr>';
+        }
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', bootTodoApp);
+    } else {
+      bootTodoApp();
+    }
+  </script>
+</body>
+</html>
