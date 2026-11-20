@@ -672,6 +672,19 @@
     var parsedSourceCount = 0;
     var todoList = [];
     var TODO_STORAGE_KEY = 'shopee_activity_todo_v1';
+    var SEEDED_ACTIVITY_KEY = 'shopee_activity_seed_2026_11_19_v1';
+    var INITIAL_ACTIVITY_ITEMS = [
+      { seedId: 'my-christmas-best-deals-2026', site: 'MY', title: 'Christmas Best Deals提报', type: '主题大促', deadline: '2026-11-20 23:59', req: '无需承诺最低价格；活动展示期间库存充足', schedule: '2026.11.26 - 2026.12.19', link: '-', path: 'L2 Deals microsite 优惠专题页', manager: '-' },
+      { seedId: 'ph-dec-cr-nomination-2026', site: 'PH', title: '菲律宾12月专场 CR补充提名', type: 'Campaign Readiness', deadline: '2026-11-23 14:00', req: '非本土店铺可参加；填写 A-N 列；每个 Model ID 单独一行；库存充足；本土店不可报名', schedule: '12.12；可选 12.1-12.11、12.13、12.15、12.30', link: '-', path: '原公告仅显示“点这里”，未包含实际网址', manager: '-' },
+      { seedId: 'vn-dec-ssc-subsidy-2026', site: 'VN', title: '12月SSC平台补贴活动确认/申请', type: '平台补贴', deadline: '2026-11-20 17:00', req: '确认参加请在 K 列反馈，并在 M 列填写最大库存；限购只能为 1', schedule: '2026年12月全月', link: 'https://shimo.im/sheets/vVAXMEBRXaHKnx3m/MODOC\\nhttps://shimo.im/sheets/vVAXMEBRXaHKnx3m/g0N5F', path: '入选商品 / 自主提报表', manager: 'Verity' },
+      { seedId: 'my-cncb-cfs-d1-check-2026', site: 'MY', title: 'CFS D-1 秒杀检查', type: '秒杀检查', deadline: '2026-11-19 13:30', req: '参考 AG 列最新目标价提报；秒杀价需低于或等于目标价', schedule: 'D-1 检查 11.20 秒杀', link: 'https://shimo.im/sheets/euJniuCMDEXDs5Uh/56PIs', path: '填写链接 / 秒杀提报表', manager: '-' },
+      { seedId: 'th-price-guarantee-2026', site: 'TH', title: 'Shopee Price Guarantee 平台竞价活动', type: '平台竞价', deadline: '2026-11-30 23:59', req: '前往后台确认；如无法接受后台价格，先拒绝再在 J 列提报新价格；改价截止 11.24 12:00', schedule: '2026.12.01 - 2026.12.31', link: 'https://seller.shopee.cn/portal/web-my-campaigns/campaign/2048119058/session/160000000183089\\nhttps://seller.shopee.co.th/portal/marketing/cmt-product/campaign/2048119058/session/160000000183089\\nhttps://shimo.im/sheets/RKAWMwW6Y6u0DKq8/aqrAQ', path: '卖家后台 > 营销活动 > 找到 Campaign name 提报', manager: '-' },
+      { seedId: 'my-jbp-package-2027', site: 'MY', title: '2027年 JBP Package 参与意向确认', type: '项目意向', deadline: '2026-11-30 23:59', req: '目标名单内填写参与意向；不参加需在 L 列填写拒绝原因；名单外可填写提名区域', schedule: '2027 JBP Package', link: 'https://shimo.im/sheets/IAnoG2Bkue8iE3Si/cirOF\\nhttps://shimo.im/sheets/IAnoG2Bkue8iE3Si/bUyy8', path: '意向确认表 / 项目详情', manager: '-' },
+      { seedId: 'ph-dec-campaign-readiness-2026', site: 'PH', title: '菲律宾12月 Campaign Readiness 活动排期确认', type: '排期确认', deadline: '2026-11-20 14:00', req: '检查 A-J 列产品、活动价格、限购、库存；取消需在 K 列填 N 并在 L 列备注原因', schedule: '12.1-12.11 Prehype；12.11 20:00-12.12 D-Day；12.13 Extension；12.15 MM Payday；12.30 EOM Payday', link: 'https://shimo.im/sheets/rp3OMJ6R5Xf0pbkm/URsmO\\nhttps://shimo.im/sheets/rp3OMJ6R5Xf0pbkm/6jebe', path: '12月 Midnight / ROTD 排期确认表', manager: '-' },
+      { seedId: 'th-vip-ep-appeal-2026', site: 'TH', title: '11月 VIP EP 申诉通道及操作指南', type: '申诉登记', deadline: '2026-11-27 23:59', req: '罚分申诉需官网填写并联系 RM/KAM；异常商品直接联系客户经理；登记表需完成店铺层级和型号层级', schedule: '申诉截止 11.27 EOD；结果确认 12.2 EOD', link: 'https://seller-rewards.shopee.co.th/shopeemarketingsolutions/shopeevipep', path: 'VIPEP 官网 / 客户经理登记', manager: '-' },
+      { seedId: 'vn-mcn-live-products-2026', site: 'VN', title: 'CB&CNLS MCN直播产品自主提报', type: '直播产品提报', deadline: '2026-11-25 10:00', req: '按产品类目设置 AMS 佣金；活动价格达到日常价 5%-15% 折扣；A-K 列填写完成', schedule: '2026年12月', link: 'https://shimo.im/sheets/erAdME2PRlfbnO3G/t3LWY', path: 'MCN 直播产品提报表', manager: '-' },
+      { seedId: 'all-dec-free-pickup-2026', site: '多站点', title: '26年12月免费揽收名单初版核对', type: '物流核对', deadline: '2026-11-22 17:00', req: '核对揽收信息；修改在问卷星提交并在 AE 列打勾；如需申诉至问卷星提交', schedule: '2026年12月免费揽收名单初版', link: 'https://doc.weixin.qq.com/sheet/e3_AasA9QbqAPsCNmeIEqj5oSXWot2D2?scode=AHIAtge9AAYx6thSeUAasA9QbqAPs&tab=cdaqau', path: '四个子表均可填写', manager: 'Samandy' }
+    ];
 
 
     function showToast(msg) {
@@ -942,6 +955,40 @@
       catch (e) { showToast('当前浏览器无法保存待办数据'); }
     }
 
+    function seedInitialActivities() {
+      var seeded = {};
+      try { seeded = JSON.parse(localStorage.getItem(SEEDED_ACTIVITY_KEY) || '{}') || {}; } catch (e) { seeded = {}; }
+      var changed = false;
+      INITIAL_ACTIVITY_ITEMS.forEach(function(item) {
+        if (seeded[item.seedId]) return;
+        var key = getActivityIdentity(item);
+        if (!todoList.some(function(existing){ return existing.key === key; })) {
+          todoList.push({
+            key: key,
+            site: item.site,
+            title: item.title,
+            type: item.type,
+            deadline: item.deadline,
+            req: item.req,
+            schedule: item.schedule,
+            link: item.link,
+            path: item.path,
+            manager: item.manager,
+            completed: false,
+            repeatCount: 1,
+            extractCount: 1,
+            lastExtractedAt: '2026/11/19 企微导入'
+          });
+        }
+        seeded[item.seedId] = true;
+        changed = true;
+      });
+      if (changed) {
+        localStorage.setItem(SEEDED_ACTIVITY_KEY, JSON.stringify(seeded));
+        saveTodoList();
+      }
+    }
+
     function dedupeTodoList(list) {
       var map = {};
       var merged = [];
@@ -969,6 +1016,8 @@
       try {
         var saved = JSON.parse(localStorage.getItem(TODO_STORAGE_KEY) || '[]');
         todoList = dedupeTodoList(Array.isArray(saved) ? saved : []);
+        seedInitialActivities();
+        todoList = dedupeTodoList(todoList);
         saveTodoList();
       } catch (e) { todoList = []; }
       renderTodoList();
