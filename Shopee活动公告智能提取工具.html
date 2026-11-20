@@ -1017,9 +1017,25 @@
     }
 
     function removeTodo(key) {
+      if (!key) return;
       todoList = todoList.filter(function(item){ return item.key !== key; });
       saveTodoList();
       renderTodoList();
+      showToast('活动已删除');
+    }
+
+    function removeTodoEncoded(button) {
+      var encodedKey = button && button.getAttribute('data-todo-key');
+      if (!encodedKey) return;
+      try { removeTodo(decodeURIComponent(encodedKey)); }
+      catch (e) { showToast('删除失败，请刷新页面后重试'); }
+    }
+
+    function toggleTodoEncoded(input) {
+      var encodedKey = input && input.getAttribute('data-todo-key');
+      if (!encodedKey) return;
+      try { toggleTodo(decodeURIComponent(encodedKey)); }
+      catch (e) { showToast('更新状态失败，请刷新页面后重试'); }
     }
 
     function clearCompletedTodos() {
@@ -1069,7 +1085,7 @@
         }).join(' ') : '-';
         var rowClass = item.completed ? ' class="todo-done"' : '';
         return '<tr' + rowClass + '>' +
-          '<td><input class="todo-check" type="checkbox" ' + (item.completed ? 'checked' : '') + ' onchange="toggleTodo(' + JSON.stringify(item.key).replace(/</g, '\\u003c') + ')"></td>' +
+          '<td><input class="todo-check" type="checkbox" ' + (item.completed ? 'checked' : '') + ' data-todo-key="' + encodeURIComponent(item.key) + '" onchange="toggleTodoEncoded(this)"></td>' +
           '<td class="' + state.css + '" title="原始截止时间：' + escapeHtml(item.deadline) + '">' + escapeHtml(formatTodoDate(item.deadline)) + '</td>' +
           '<td><span class="status-chip">' + escapeHtml(state.label) + '</span></td>' +
           '<td><span class="site-tag ' + getSiteTagClass(item.site) + '">' + escapeHtml(item.site) + '</span></td>' +
@@ -1079,7 +1095,7 @@
           '<td class="todo-link-cell">' + links + '</td>' +
           '<td style="text-align:center;"><span class="status-chip">' + Number(item.repeatCount || 1) + ' 次</span></td>' +
           '<td style="white-space:nowrap;font-size:11px;">' + escapeHtml(item.lastExtractedAt || '-') + '</td>' +
-          '<td><button class="btn btn-outline" style="padding:4px 8px;font-size:11px;" onclick="removeTodo(' + JSON.stringify(item.key).replace(/</g, '\\u003c') + ')">删除</button></td>' +
+          '<td><button class="btn btn-outline" style="padding:4px 8px;font-size:11px;" data-todo-key="' + encodeURIComponent(item.key) + '" onclick="removeTodoEncoded(this)">删除</button></td>' +
           '</tr>';
       }).join('');
     }
