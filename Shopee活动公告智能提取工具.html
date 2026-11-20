@@ -570,6 +570,8 @@
       .result-header { align-items: flex-start !important; flex-direction: column !important; }
       .action-bar .btn { flex: 1 1 auto; justify-content: center; }
     }
+  </style>
+</head>
 <body>
   <div id="toast" class="toast">✓ 活动已保存到待办清单</div>
   <div class="container">
@@ -595,7 +597,7 @@
 
     <div class="result-section">
       <div class="result-header">
-        <h2 style="font-size:14px; font-weight:600;">本次解析结果 (<span id="count-span">0</span> 条活动)</h2>
+        <h2 style="font-size:14px; font-weight:600;">本次解析结果（<span id="count-span">0</span> 条公告，合并后 <span id="unique-count-span">0</span> 项）</h2>
         <span style="font-size:12px; color:var(--text-muted);">解析后会自动合并到右侧待办清单</span>
       </div>
       <div class="table-responsive">
@@ -651,7 +653,7 @@
               <th>活动类型</th>
               <th>活动排期</th>
               <th>链接</th>
-              <th>提取次数</th>
+              <th>重复数量</th>
               <th>最近提取</th>
               <th>操作</th>
             </tr>
@@ -667,6 +669,7 @@
  
   <script>
     var parsedList = [];
+    var parsedSourceCount = 0;
     var todoList = [];
     var TODO_STORAGE_KEY = 'shopee_activity_todo_v1';
 
@@ -681,6 +684,7 @@
     function clearInput() {
       document.getElementById('raw-input').value = '';
       parsedList = [];
+      parsedSourceCount = 0;
       renderTable();
       loadTodoList();
     }
@@ -847,8 +851,48 @@
         .replace(/'/g, '&#39;');
     }
 
+    function normalizeActivityText(value) {
+      return String(value == null ? '' : value)
+        .toLowerCase()
+        .replace(/[\s\u3000]+/g, '')
+        .replace(/[“”"'‘’「」【】()（）\[\]：:，,。.!！、]/g, '');
+    }
+
+    function getActivityIdentity(item) {
+      var site = normalizeActivityText(item.site);
+      var title = normalizeActivityText(item.title);
+      var type = normalizeActivityText(item.type);
+      var deadline = normalizeActivityText(item.deadline);
+      var schedule = normalizeActivityText(item.schedule);
+      var links = normalizeActivityText(item.link).split(/\n+/).filter(Boolean).sort().join('|');
+      // 有提报链接时优先用“站点 + 链接”识别；无链接时使用活动核心字段。
+      if (links && links !== '-') return [site, 'link', links].join('|');
+      return [site, title, type, deadline, schedule].join('|');
+    }
+
     function getTodoKey(item) {
-      return [item.site, item.title, item.schedule, item.link].join('|').toLowerCase();
+      return getActivityIdentity(item);
+    }
+
+    function mergeDuplicateParsedItems(items) {
+      var map = {};
+      var merged = [];
+      items.forEach(function(item) {
+        var key = getActivityIdentity(item);
+        if (!map[key]) {
+          map[key] = Object.assign({}, item, { key: key, repeatCount: 1 });
+          merged.push(map[key]);
+        } else {
+          map[key].repeatCount += 1;
+          // 保留信息更完整的字段，但不新增重复行。
+          ['deadline', 'req', 'schedule', 'link', 'path', 'manager'].forEach(function(field) {
+            if ((!map[key][field] || map[key][field] === '-') && item[field] && item[field] !== '-') {
+              map[key][field] = item[field];
+            }
+          });
+        }
+      });
+      return merged;
     }
 
     function parseDeadline(value) {
@@ -898,10 +942,34 @@
       catch (e) { showToast('当前浏览器无法保存待办数据'); }
     }
 
+    function dedupeTodoList(list) {
+      var map = {};
+      var merged = [];
+      (Array.isArray(list) ? list : []).forEach(function(item) {
+        var key = getActivityIdentity(item);
+        var repeatCount = Number(item.repeatCount || item.extractCount || 1);
+        if (!map[key]) {
+          map[key] = Object.assign({}, item, { key: key, repeatCount: repeatCount });
+          merged.push(map[key]);
+          return;
+        }
+        var target = map[key];
+        target.repeatCount += repeatCount;
+        target.completed = target.completed || item.completed === true;
+        ['deadline', 'req', 'schedule', 'link', 'path', 'manager'].forEach(function(field) {
+          if ((!target[field] || target[field] === '-') && item[field] && item[field] !== '-') target[field] = item[field];
+        });
+        if (item.lastExtractedAt && String(item.lastExtractedAt) > String(target.lastExtractedAt || '')) target.lastExtractedAt = item.lastExtractedAt;
+        target.extractCount = Math.max(Number(target.extractCount || 1), Number(item.extractCount || 1));
+      });
+      return merged;
+    }
+
     function loadTodoList() {
       try {
         var saved = JSON.parse(localStorage.getItem(TODO_STORAGE_KEY) || '[]');
-        todoList = Array.isArray(saved) ? saved : [];
+        todoList = dedupeTodoList(Array.isArray(saved) ? saved : []);
+        saveTodoList();
       } catch (e) { todoList = []; }
       renderTodoList();
     }
@@ -917,6 +985,7 @@
           old.key = key;
           old.completed = completed;
           old.extractCount = (old.extractCount || 1) + 1;
+          old.repeatCount = Number(old.repeatCount || 1) + Number(item.repeatCount || 1);
           old.lastExtractedAt = now;
         } else {
           todoList.push({
@@ -931,6 +1000,7 @@
             path: item.path,
             manager: item.manager,
             completed: item.status === '已完成',
+            repeatCount: Number(item.repeatCount || 1),
             extractCount: 1,
             lastExtractedAt: now
           });
@@ -1007,7 +1077,7 @@
           '<td><span class="type-tag">' + escapeHtml(item.type || '常规活动') + '</span></td>' +
           '<td class="todo-schedule-cell" title="' + escapeHtml(item.schedule || '-') + '">' + escapeHtml(item.schedule || '-') + '</td>' +
           '<td class="todo-link-cell">' + links + '</td>' +
-          '<td style="text-align:center;">' + Number(item.extractCount || 1) + '</td>' +
+          '<td style="text-align:center;"><span class="status-chip">' + Number(item.repeatCount || 1) + ' 次</span></td>' +
           '<td style="white-space:nowrap;font-size:11px;">' + escapeHtml(item.lastExtractedAt || '-') + '</td>' +
           '<td><button class="btn btn-outline" style="padding:4px 8px;font-size:11px;" onclick="removeTodo(' + JSON.stringify(item.key).replace(/</g, '\\u003c') + ')">删除</button></td>' +
           '</tr>';
@@ -1021,18 +1091,25 @@
         return;
       }
       var chunks = splitAnnouncements(raw);
-      parsedList = [];
+      parsedSourceCount = 0;
+      var parsedItems = [];
       chunks.forEach(function(chunk) {
-        if (chunk.length > 15) parsedList.push(parseSingle(chunk));
+        if (chunk.length > 15) {
+          parsedSourceCount += 1;
+          parsedItems.push(parseSingle(chunk));
+        }
       });
+      parsedList = mergeDuplicateParsedItems(parsedItems);
       mergeParsedIntoTodos();
       renderTable();
-      showToast('已识别 ' + parsedList.length + ' 条活动，并保存到右侧待办清单');
+      showToast('已识别 ' + parsedSourceCount + ' 条公告，合并为 ' + parsedList.length + ' 项活动并保存到待办清单');
     }
 
     function renderTable() {
       var tbody = document.getElementById('table-body');
-      document.getElementById('count-span').innerText = parsedList.length;
+      document.getElementById('count-span').innerText = parsedSourceCount || parsedList.length;
+      var uniqueCount = document.getElementById('unique-count-span');
+      if (uniqueCount) uniqueCount.innerText = parsedList.length;
       if (parsedList.length === 0) {
         tbody.innerHTML = '<tr><td colspan="11"><div class="empty-state"><div class="empty-state-icon">↗</div><div class="empty-state-title">等待解析公告</div><div class="empty-state-copy">在左侧输入框粘贴公告，解析结果会显示在这里</div></div></td></tr>';
         return;
